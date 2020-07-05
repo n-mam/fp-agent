@@ -1,4 +1,5 @@
 #include <iostream>
+#include <npl.hpp>
 
 int main(void)
 {
