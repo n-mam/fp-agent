@@ -20,6 +20,10 @@ int main(int argc, char *argv[])
     {
       std::cout << "client : " << m << "\n";
 
+      Json j(m);
+
+      auto service = j.GetKey("service");
+
       c->SendProtocolMessage(
         (uint8_t *)"server echo : hello", 
         strlen("server echo : hello")
