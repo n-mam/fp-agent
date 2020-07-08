@@ -15,14 +15,16 @@ int main(int argc, char *argv[])
   auto port = std::stoi(argv[2]);
 
   auto ws = NPL::make_ws_server(
-    host, port, TLS::YES, 
+    host,
+    port,
+    TLS::YES,
     [] (SPCProtocol c, const std::string& m) 
     {
       std::cout << "client : " << m << "\n";
 
-      Json j(m);
+      Json message(m);
 
-      auto service = j.GetKey("service");
+      auto service = message.GetKey("service");
 
       c->SendProtocolMessage(
         (uint8_t *)"server echo : hello", 
