@@ -1,5 +1,7 @@
+#include <map>
 #include <iostream>
-#include <npl.hpp>
+
+#include <FTP.hpp>
 
 int main(int argc, char *argv[])
 {
@@ -14,22 +16,40 @@ int main(int argc, char *argv[])
 
   auto port = std::stoi(argv[2]);
 
+  std::map<std::string, SPCManager> mm;
+
+  mm.insert(
+    std::make_pair(
+      "ftp",
+      std::make_shared<CFTPManager>()
+    )
+  );
+
+  /*
+   * start the websocket server
+   */
   auto ws = NPL::make_ws_server(
-    host,
-    port,
-    TLS::YES,
-    [] (SPCProtocol c, const std::string& m) 
+    host, port, TLS::YES,
+    [&mm] (SPCProtocol c, const std::string& message) 
     {
-      std::cout << "client : " << m << "\n";
+      std::cout << "client : " << message << "\n";
 
-      Json message(m);
+      Json json(message);
 
-      auto service = message.GetKey("service");
+      auto s = json.GetKey("service");
 
-      c->SendProtocolMessage(
-        (uint8_t *)"server echo : hello", 
-        strlen("server echo : hello")
-      );
+      if (s.length())
+      {
+        auto& manager = mm[s];
+        manager->Dispatch(c, json);
+      }
+      else
+      {
+        c->SendProtocolMessage(
+          (uint8_t *)"Error : unknown service", 
+          strlen("Error : unknown service")
+        );        
+      }
     }
   );
 
