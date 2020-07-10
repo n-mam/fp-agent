@@ -36,18 +36,17 @@ int main(int argc, char *argv[])
 
       Json json(message);
 
-      auto s = json.GetKey("service");
+      auto app = json.GetKey("app");
 
-      if (s.length())
+      if (app.length())
       {
-        auto& manager = mm[s];
-        manager->Dispatch(c, json);
+        mm[app]->Dispatch(c, json);
       }
       else
       {
         c->SendProtocolMessage(
-          (uint8_t *)"Error : unknown service", 
-          strlen("Error : unknown service")
+          (uint8_t *)"Error : unknown application", 
+          strlen("Error : unknown application")
         );        
       }
     }

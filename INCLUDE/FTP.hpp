@@ -10,15 +10,19 @@ class CFTPManager : public CManager
 {
   public:
 
-    void Dispatch(SPCProtocol c, Json& req) override
+    void Dispatch(SPCProtocol c, Json& json) override
     {
-      if (req.HasKey("cmd"))
+      if (json.HasKey("req"))
       {
-        auto cmd = req.GetKey("cmd");
+        auto req = json.GetKey("req");
 
-        if (cmd == "connect")
+        if (req == "connect")
         {
-          CreateFTPSession(c, req);
+          ConnectFTPSession(c, json);
+        }
+        else if (req == "list")
+        {
+          GetDirectoryList(c, json);
         }
       }
       else
@@ -27,15 +31,13 @@ class CFTPManager : public CManager
       }
     }
 
-    void CreateFTPSession(SPCProtocol c, Json& req)
+    void ConnectFTPSession(SPCProtocol c, Json& json)
     {
-      auto host = req.GetKey("host");
-      auto port = req.GetKey("port");
-      auto user = req.GetKey("user");
-      auto pass = req.GetKey("pass");
-      auto ftps = req.GetKey("ftps");
-      auto dir = req.GetKey("dir");
-      auto DCProt = req.GetKey("dcprot");
+      auto host = json.GetKey("host");
+      auto port = json.GetKey("port");
+      auto user = json.GetKey("user");
+      auto pass = json.GetKey("pass");
+      auto ftps = json.GetKey("ftps");
 
       auto ftp = NPL::make_ftp(host, std::stoi(port), NPL::TLS::NO);
 
@@ -43,38 +45,37 @@ class CFTPManager : public CManager
 
       ftp->StartClient();
 
-      if (dir.length())
-      {
-        GetDirectoryList(c, ftp, dir);
-      }
+      ftp->SetID(iSessions.size());
+
+      iSessions.push_back(ftp);
+
+      json.SetKey("id", std::to_string(ftp->GetID()));
+
+      SendResponse(c, json);
     }
 
-    void GetDirectoryList(SPCProtocol c, SPCProtocol p, const std::string& dir)
+    void GetDirectoryList(SPCProtocol c, Json& json)
     {
-      NPL::DCProt prot = NPL::DCProt::Protected;
+      auto id = json.GetKey("id");
+      auto dir = json.GetKey("dir");
 
-      auto ftp = std::dynamic_pointer_cast<CProtocolFTP>(p);
+      auto ftp = std::dynamic_pointer_cast<CProtocolFTP>
+                     (iSessions[std::stoi(id)]);
 
       ftp->ListDirectory(
-        [list = std::string(""), c, dir, this] 
+        [this, c, json, data = std::string("")] 
         (const char *b, size_t n) mutable {
           if (b) 
           {
-            list.append(std::string(b, n));
+            data.append(std::string(b, n));
           }
           else
           {
-            Json res;
-
-            res.SetKey("data", list);
-            res.SetKey("dir", dir);            
-            res.SetKey("event", "list");
-            res.SetKey("service", "ftp");
-
-            SendResponse(c, res);
+            json.SetKey("data", data);
+            SendResponse(c, json);
           }
           return true;
-        }, dir, prot);
+        }, dir, NPL::DCProt::Protected);
     }
 
 };
