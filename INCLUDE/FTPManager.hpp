@@ -33,6 +33,7 @@ class CFTPManager : public CManager
 
     void ConnectFTPSession(SPCProtocol c, Json& json)
     {
+      auto sid = json.GetKey("sid");
       auto host = json.GetKey("host");
       auto port = json.GetKey("port");
       auto user = json.GetKey("user");
@@ -45,22 +46,20 @@ class CFTPManager : public CManager
 
       ftp->StartClient();
 
-      ftp->SetID(iSessions.size());
-
-      iSessions.push_back(ftp);
-
-      json.SetKey("id", std::to_string(ftp->GetID()));
+      SessionMap.insert(
+        std::make_pair(sid, ftp)
+      );
 
       SendResponse(c, json);
     }
 
     void GetDirectoryList(SPCProtocol c, Json& json)
     {
-      auto id = json.GetKey("id");
+      auto sid = json.GetKey("sid");
       auto dir = json.GetKey("dir");
 
       auto ftp = std::dynamic_pointer_cast<CProtocolFTP>
-                     (iSessions[std::stoi(id)]);
+                     (SessionMap[sid]);
 
       ftp->ListDirectory(
         [this, c, json, data = std::string("")] 

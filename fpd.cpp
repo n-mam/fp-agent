@@ -1,7 +1,8 @@
 #include <map>
 #include <iostream>
 
-#include <FTP.hpp>
+#include <OSManager.hpp>
+#include <FTPManager.hpp>
 
 int main(int argc, char *argv[])
 {
@@ -16,37 +17,31 @@ int main(int argc, char *argv[])
 
   auto port = std::stoi(argv[2]);
 
-  std::map<std::string, SPCManager> mm;
-
-  mm.insert(
-    std::make_pair(
-      "ftp",
-      std::make_shared<CFTPManager>()
-    )
-  );
+  CManager::AddManagerToMMap("os", std::make_shared<COSManager>());
+  CManager::AddManagerToMMap("ftp", std::make_shared<CFTPManager>());
 
   /*
    * start the websocket server
    */
   auto ws = NPL::make_ws_server(
     host, port, TLS::YES,
-    [&mm] (SPCProtocol c, const std::string& message) 
+    [] (SPCProtocol c, const std::string& message) 
     {
       std::cout << "client : " << message << "\n";
 
       Json json(message);
 
-      auto app = json.GetKey("app");
+      auto key = json.GetKey("app");
 
-      if (app.length())
+      if (key.length())
       {
-        mm[app]->Dispatch(c, json);
+        ManagerMap[key]->Dispatch(c, json);
       }
       else
       {
         c->SendProtocolMessage(
-          (uint8_t *)"Error : unknown application", 
-          strlen("Error : unknown application")
+          (uint8_t *)"Error : unknown application request", 
+          strlen("Error : unknown application request")
         );        
       }
     }
