@@ -1,9 +1,6 @@
 #ifndef FTPMANAGER_HPP
 #define FTPMANAGER_HPP
 
-#include <memory>
-#include <assert.h>
-
 #include <Manager.hpp>
 
 class CFTPManager : public CManager

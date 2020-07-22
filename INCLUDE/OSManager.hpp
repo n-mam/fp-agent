@@ -1,9 +1,6 @@
 #ifndef OSMANAGER_HPP
 #define OSMANAGER_HPP
 
-#include <memory>
-#include <assert.h>
-
 #include <Manager.hpp>
 
 class COSManager : public CManager

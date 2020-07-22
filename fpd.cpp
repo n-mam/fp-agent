@@ -2,6 +2,7 @@
 #include <iostream>
 
 #include <OSManager.hpp>
+#include <CVManager.hpp>
 #include <FTPManager.hpp>
 
 int main(int argc, char *argv[])
@@ -14,14 +15,14 @@ int main(int argc, char *argv[])
   }
 
   auto host = std::string(argv[1]);
-
   auto port = std::stoi(argv[2]);
 
   CManager::AddManagerToMMap("os", std::make_shared<COSManager>());
-  CManager::AddManagerToMMap("ftp", std::make_shared<CFTPManager>());
+  CManager::AddManagerToMMap("cv", std::make_shared<CCVManager>());
+  CManager::AddManagerToMMap("ftp", std::make_shared<CFTPManager>());    
 
   /*
-   * start the websocket server
+   * start websocket server
    */
   auto ws = NPL::make_ws_server(
     host, port, TLS::YES,
@@ -39,10 +40,8 @@ int main(int argc, char *argv[])
       }
       else
       {
-        c->SendProtocolMessage(
-          (uint8_t *)"Error : unknown application request", 
-          strlen("Error : unknown application request")
-        );        
+        std::string m = "Error : unknown application request";
+        c->SendProtocolMessage((uint8_t *) m.data(), m.size());        
       }
     }
   );

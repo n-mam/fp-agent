@@ -3,6 +3,7 @@
 
 #include <memory>
 #include <vector>
+#include <assert.h>
 
 #include <npl.hpp>
 
@@ -25,19 +26,14 @@ class CManager
 
     void SendResponse(SPCProtocol c, Json& res)
     {
-      auto message = res.Stringify();
+      auto r = res.Stringify();
 
-      c->SendProtocolMessage(
-          (uint8_t *)message.data(), 
-          message.size()
-        );   
+      c->SendProtocolMessage((uint8_t *)r.data(), r.size());   
     }
 
     static void AddManagerToMMap(const std::string& key, SPCManager value)
     {
-      ManagerMap.insert(
-        std::make_pair(key, value)
-      );
+      ManagerMap.insert(std::make_pair(key, value));
     }    
 
   protected:
