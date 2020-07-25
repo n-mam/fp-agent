@@ -43,9 +43,7 @@ class CFTPManager : public CManager
 
       ftp->StartClient();
 
-      SessionMap.insert(
-        std::make_pair(sid, ftp)
-      );
+      SessionMap.insert(std::make_pair(sid, ftp));
 
       SendResponse(c, json);
     }

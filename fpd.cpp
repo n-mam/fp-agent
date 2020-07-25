@@ -2,8 +2,8 @@
 #include <iostream>
 
 #include <OSManager.hpp>
-#include <CVManager.hpp>
 #include <FTPManager.hpp>
+#include <CameraManager.hpp>
 
 int main(int argc, char *argv[])
 {
@@ -18,7 +18,7 @@ int main(int argc, char *argv[])
   auto port = std::stoi(argv[2]);
 
   CManager::AddManagerToMMap("os", std::make_shared<COSManager>());
-  CManager::AddManagerToMMap("cv", std::make_shared<CCVManager>());
+  CManager::AddManagerToMMap("cv", std::make_shared<CCameraManager>());
   CManager::AddManagerToMMap("ftp", std::make_shared<CFTPManager>());    
 
   /*
