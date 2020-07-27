@@ -7,7 +7,7 @@ class CFTPManager : public CManager
 {
   public:
 
-    void Dispatch(SPCProtocol c, Json& json) override
+    void Dispatch(Json& json) override
     {
       if (json.HasKey("req"))
       {
@@ -15,11 +15,11 @@ class CFTPManager : public CManager
 
         if (req == "connect")
         {
-          ConnectFTPSession(c, json);
+          ConnectFTPSession(json);
         }
         else if (req == "list")
         {
-          GetDirectoryList(c, json);
+          GetDirectoryList(json);
         }
       }
       else
@@ -28,7 +28,7 @@ class CFTPManager : public CManager
       }
     }
 
-    void ConnectFTPSession(SPCProtocol c, Json& json)
+    void ConnectFTPSession(Json& json)
     {
       auto sid = json.GetKey("sid");
       auto host = json.GetKey("host");
@@ -45,10 +45,10 @@ class CFTPManager : public CManager
 
       SessionMap.insert(std::make_pair(sid, ftp));
 
-      SendResponse(c, json);
+      SendResponse(json);
     }
 
-    void GetDirectoryList(SPCProtocol c, Json& json)
+    void GetDirectoryList(Json& json)
     {
       auto sid = json.GetKey("sid");
       auto dir = json.GetKey("dir");
@@ -57,7 +57,7 @@ class CFTPManager : public CManager
                      (SessionMap[sid]);
 
       ftp->ListDirectory(
-        [this, c, json, data = std::string("")] 
+        [this, json, data = std::string("")] 
         (const char *b, size_t n) mutable {
           if (b) 
           {
@@ -66,7 +66,7 @@ class CFTPManager : public CManager
           else
           {
             json.SetKey("data", data);
-            SendResponse(c, json);
+            SendResponse(json);
           }
           return true;
         }, dir, NPL::DCProt::Protected);

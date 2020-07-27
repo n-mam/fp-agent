@@ -22,25 +22,27 @@ class CManager
 
     ~CManager() {}
 
-    virtual void Dispatch(SPCProtocol c, Json& req) = 0;
+    virtual void Dispatch(Json& req) = 0;
 
-    void SendResponse(SPCProtocol c, Json& res)
+    void SendResponse(Json& res)
     {
       auto r = res.Stringify();
-
-      c->SendProtocolMessage((uint8_t *)r.data(), r.size());   
+      iClient->SendProtocolMessage((uint8_t *)r.data(), r.size());   
     }
 
     static void AddManagerToMMap(const std::string& key, SPCManager value)
     {
       ManagerMap.insert(std::make_pair(key, value));
-    }    
+    }
 
+    static SPCProtocol iClient;
+  
   protected:
 
 };
 
-using WPCManager = std::weak_ptr<CManager>;
+SPCProtocol CManager::iClient = nullptr;
 
+using WPCManager = std::weak_ptr<CManager>;
 
 #endif //MANAGER_HPP

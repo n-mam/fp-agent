@@ -8,7 +8,7 @@ class CCameraManager : public CManager
 {
   public:
 
-    void Dispatch(SPCProtocol c, Json& json) override
+    void Dispatch(Json& json) override
     {
       if (json.HasKey("req"))
       {
@@ -16,11 +16,11 @@ class CCameraManager : public CManager
 
         if (req == "start-camera")
         {
-          StartCameraSession(c, json);
+          StartCameraSession(json);
         }
         else if (req == "stop-camera")
         {
-          StopCameraSession(c, json);
+          StopCameraSession(json);
         }
       }
       else
@@ -29,23 +29,52 @@ class CCameraManager : public CManager
       }
     }
 
-    void StartCameraSession(SPCProtocol c, Json& json)
+    void StartCameraSession(Json& json)
     {
       auto sid = json.GetKey("sid");
-      auto rtsp = json.GetKey("url");
+      auto source = json.GetKey("source");
+      auto target = json.GetKey("target");
+      auto tracker = json.GetKey("tracker");
 
-      auto camera = CVL::make_camera(rtsp);
+      auto camera = CVL::make_camera(source, target, tracker);
 
-      camera->Start();
+      camera->SetName(sid);
+
+      camera->Start([this, sid](){
+        CameraStoppedCallback(sid);
+      });
+
+      camera->OnConnect();
 
       SessionMap.insert(std::make_pair(sid, camera));
 
-      SendResponse(c, json);
+      SendResponse(json);
     }
 
-    void StopCameraSession(SPCProtocol c, Json& json)
+    void StopCameraSession(Json& json)
     {
+      auto sid = json.GetKey("sid");
 
+      auto camera = std::dynamic_pointer_cast<CCamera>
+        (SessionMap[sid]);
+
+      camera->Stop([this, sid](){
+        CameraStoppedCallback(sid);
+      });
+    }
+
+    void CameraStoppedCallback(const std::string& sid)
+    {
+      Json j;
+      j.SetKey("app", "cam");
+      j.SetKey("sid", sid);
+      j.SetKey("req", "stop-camera");
+
+      auto camera = std::dynamic_pointer_cast<CCamera>(SessionMap[sid]);
+
+      camera->OnDisconnect();
+
+      SendResponse(j);
     }
 };
 

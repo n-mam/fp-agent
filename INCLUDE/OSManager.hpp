@@ -7,7 +7,7 @@ class COSManager : public CManager
 {
   public:
 
-    void Dispatch(SPCProtocol c, Json& json) override
+    void Dispatch(Json& json) override
     {
       if (json.HasKey("req"))
       {
@@ -15,11 +15,11 @@ class COSManager : public CManager
 
         if (req == "get-active-sessions")
         {
-          GetActiveSessions(c, json);
+          GetActiveSessions(json);
         }
         else if (req == "get-volumes")
         {
-          GetVolumes(c, json);
+          GetVolumes(json);
         }
       }
       else
@@ -28,27 +28,26 @@ class COSManager : public CManager
       }
     }
 
-    void GetActiveSessions(SPCProtocol c, Json& json)
+    void GetActiveSessions(Json& json)
     {
       std::vector<Json> sv;
 
-      for (auto& e : SessionMap)
+      for (auto& session : SessionMap)
       {
-        Json s;
-        
-        s.SetKey("sid", e.first);
-        
-        sv.push_back(s);
+        if ((session.second)->IsConnected())
+        {
+          Json s;
+          s.SetKey("sid", session.first);
+          sv.push_back(s);
+        }
       }
 
       auto sa = Json::JsonListToArray(sv);
-
       json.SetKey("sessions", sa);
-
-      SendResponse(c, json);
+      SendResponse(json);
     }
 
-    void GetVolumes(SPCProtocol c, Json& json)
+    void GetVolumes(Json& json)
     {
       auto sid = json.GetKey("sid");
 

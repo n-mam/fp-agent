@@ -18,7 +18,7 @@ int main(int argc, char *argv[])
   auto port = std::stoi(argv[2]);
 
   CManager::AddManagerToMMap("os", std::make_shared<COSManager>());
-  CManager::AddManagerToMMap("cv", std::make_shared<CCameraManager>());
+  CManager::AddManagerToMMap("cam", std::make_shared<CCameraManager>());
   CManager::AddManagerToMMap("ftp", std::make_shared<CFTPManager>());    
 
   /*
@@ -36,7 +36,8 @@ int main(int argc, char *argv[])
 
       if (key.length())
       {
-        ManagerMap[key]->Dispatch(c, json);
+        CManager::iClient = c;
+        ManagerMap[key]->Dispatch(json);
       }
       else
       {
