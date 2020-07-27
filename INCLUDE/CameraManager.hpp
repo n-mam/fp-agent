@@ -22,6 +22,18 @@ class CCameraManager : public CManager
         {
           StopCameraSession(json);
         }
+        else if (req == "cam-play")
+        {
+          CameraPlay(json);
+        }
+        else if (req == "cam-pause")
+        {
+          CameraPause(json);
+        }
+        else
+        {
+
+        }
       }
       else
       {
@@ -75,6 +87,33 @@ class CCameraManager : public CManager
       camera->OnDisconnect();
 
       SendResponse(j);
+    }
+
+    void CameraPlay(Json& json)
+    {
+      auto sid = json.GetKey("sid");
+
+      auto camera = std::dynamic_pointer_cast<CCamera>
+        (SessionMap[sid]);
+
+      camera->Play([this, sid](const std::string& frame){
+        Json j;
+        j.SetKey("app", "cam");
+        j.SetKey("sid", sid);
+        j.SetKey("req", "stream");
+        j.SetKey("frame", frame);
+        SendResponse(j);
+      });
+    }
+
+    void CameraPause(Json& json)
+    {
+      auto sid = json.GetKey("sid");
+
+      auto camera = std::dynamic_pointer_cast<CCamera>
+        (SessionMap[sid]);
+
+      camera->Pause();
     }
 };
 

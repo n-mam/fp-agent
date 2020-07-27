@@ -32,13 +32,20 @@ class COSManager : public CManager
     {
       std::vector<Json> sv;
 
-      for (auto& session : SessionMap)
+      auto& it = SessionMap.begin();
+
+      while (it != SessionMap.end())
       {
-        if ((session.second)->IsConnected())
+        if (((*it).second)->IsConnected())
         {
           Json s;
-          s.SetKey("sid", session.first);
+          s.SetKey("sid", (*it).first);
           sv.push_back(s);
+          ++it;
+        } 
+        else
+        {
+          it = SessionMap.erase(it);
         }
       }
 
