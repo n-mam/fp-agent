@@ -14,25 +14,38 @@ class CCameraManager : public CManager
       {
         auto req = json.GetKey("req");
 
-        if (req == "start-camera")
+        if (req == "camera-create")
         {
-          StartCameraSession(json);
+          CreateCameraSession(json);
         }
-        else if (req == "stop-camera")
+        else if (req == "camera-delete")
         {
-          StopCameraSession(json);
+          DeleteCameraSession(json);
         }
-        else if (req == "cam-play")
+        else if (req == "camera-control")
         {
-          CameraPlay(json);
-        }
-        else if (req == "cam-pause")
-        {
-          CameraPause(json);
-        }
-        else
-        {
+          auto action = json.GetKey("action");
 
+          if (action == "play")
+          {
+            CameraPlay(json);
+          }
+          else if (action == "pause")
+          {
+            CameraPause(json);
+          }
+          else if (action == "stop")
+          {
+            CameraStop(json);
+          }
+          else if (action == "forward")
+          {
+
+          }
+          else if (action == "backward")
+          {
+
+          }
         }
       }
       else
@@ -41,7 +54,7 @@ class CCameraManager : public CManager
       }
     }
 
-    void StartCameraSession(Json& json)
+    void CreateCameraSession(Json& json)
     {
       auto sid = json.GetKey("sid");
       auto source = json.GetKey("source");
@@ -52,56 +65,50 @@ class CCameraManager : public CManager
 
       camera->SetName(sid);
 
-      camera->Start([this, sid](){
-        CameraStoppedCallback(sid);
-      });
+      SessionMap.insert(std::make_pair(sid, camera));
 
       camera->OnConnect();
-
-      SessionMap.insert(std::make_pair(sid, camera));
 
       SendResponse(json);
     }
 
-    void StopCameraSession(Json& json)
+    void DeleteCameraSession(Json& json)
     {
       auto sid = json.GetKey("sid");
-
-      auto camera = std::dynamic_pointer_cast<CCamera>
-        (SessionMap[sid]);
-
-      camera->Stop([this, sid](){
-        CameraStoppedCallback(sid);
-      });
-    }
-
-    void CameraStoppedCallback(const std::string& sid)
-    {
-      Json j;
-      j.SetKey("app", "cam");
-      j.SetKey("sid", sid);
-      j.SetKey("req", "stop-camera");
 
       auto camera = std::dynamic_pointer_cast<CCamera>(SessionMap[sid]);
 
       camera->OnDisconnect();
 
-      SendResponse(j);
+      camera->Stop([this, sid](){
+        CameraStopCallback(sid);
+      });
     }
 
     void CameraPlay(Json& json)
     {
       auto sid = json.GetKey("sid");
 
-      auto camera = std::dynamic_pointer_cast<CCamera>
-        (SessionMap[sid]);
+      auto camera = std::dynamic_pointer_cast<CCamera>(SessionMap[sid]);
 
-      camera->Play([this, sid](const std::string& frame){
+      if (camera->IsStarted() && !camera->IsPaused())
+      {
+        return;
+      }
+
+      if (!camera->IsStarted())
+      {
+        camera->Start([this, sid](){
+          CameraStopCallback(sid);
+        });
+      }
+
+      camera->Play([this, sid](const std::string& encoded){
         Json j;
         j.SetKey("app", "cam");
         j.SetKey("sid", sid);
-        j.SetKey("req", "stream");
-        j.SetKey("frame", frame);
+        j.SetKey("req", "play");
+        j.SetKey("frame", encoded);
         SendResponse(j);
       });
     }
@@ -110,10 +117,34 @@ class CCameraManager : public CManager
     {
       auto sid = json.GetKey("sid");
 
-      auto camera = std::dynamic_pointer_cast<CCamera>
-        (SessionMap[sid]);
+      auto camera = std::dynamic_pointer_cast<CCamera>(SessionMap[sid]);
 
-      camera->Pause();
+      if (camera->IsStarted())
+      {
+        camera->Pause();
+      }
+
+      SendResponse(json);
+    }
+
+    void CameraStop(Json& json)
+    {
+      auto sid = json.GetKey("sid");
+
+      auto camera = std::dynamic_pointer_cast<CCamera>(SessionMap[sid]);
+
+      camera->Stop([this, sid](){
+        CameraStopCallback(sid);
+      });
+    }
+
+    void CameraStopCallback(const std::string& sid)
+    {
+      Json j;
+      j.SetKey("app", "cam");
+      j.SetKey("sid", sid);
+      j.SetKey("req", "camera-stop");
+      SendResponse(j);
     }
 };
 
