@@ -13,11 +13,7 @@ class COSManager : public CManager
       {
         auto req = json.GetKey("req");
 
-        if (req == "get-active-sessions")
-        {
-          GetActiveSessions(json);
-        }
-        else if (req == "get-volumes")
+        if (req == "get-volumes")
         {
           GetVolumes(json);
         }
@@ -28,36 +24,8 @@ class COSManager : public CManager
       }
     }
 
-    void GetActiveSessions(Json& json)
-    {
-      std::vector<Json> sv;
-
-      auto& it = SessionMap.begin();
-
-      while (it != SessionMap.end())
-      {
-        if (((*it).second)->IsConnected())
-        {
-          Json s;
-          s.SetKey("sid", (*it).first);
-          sv.push_back(s);
-          ++it;
-        } 
-        else
-        {
-          it = SessionMap.erase(it);
-        }
-      }
-
-      auto sa = Json::JsonListToArray(sv);
-      json.SetKey("sessions", sa);
-      SendResponse(json);
-    }
-
     void GetVolumes(Json& json)
     {
-      auto sid = json.GetKey("sid");
-
 
     }
 

@@ -14,7 +14,11 @@ class CCameraManager : public CManager
       {
         auto req = json.GetKey("req");
 
-        if (req == "camera-create")
+        if (req == "get-active-sessions")
+        {
+          GetActiveSessions(json);
+        }
+        else if (req == "camera-create")
         {
           CreateCameraSession(json);
         }
@@ -52,6 +56,30 @@ class CCameraManager : public CManager
       {
 
       }
+    }
+
+    virtual std::vector<Json> GetActiveSessions(Json& json) override
+    {
+      auto sl = CManager::GetActiveSessions(json);
+
+      for (auto& s : sl)
+      {
+        auto sid = s.GetKey("sid");
+
+        auto camera = std::dynamic_pointer_cast<CCamera>(SessionMap[sid]);
+
+        bool paused = camera->IsPaused();
+        bool started = camera->IsStarted();
+
+        s.SetKey("paused", paused ? "true" : "false");
+        s.SetKey("started", started ? "true" : "false");
+      }
+
+      json.SetKey("sessions", Json::JsonListToArray(sl));
+
+      SendResponse(json);
+
+      return sl;
     }
 
     void CreateCameraSession(Json& json)
@@ -111,6 +139,8 @@ class CCameraManager : public CManager
         j.SetKey("frame", encoded);
         SendResponse(j);
       });
+
+      SendResponse(json);
     }
 
     void CameraPause(Json& json)
@@ -136,6 +166,8 @@ class CCameraManager : public CManager
       camera->Stop([this, sid](){
         CameraStopCallback(sid);
       });
+
+      SendResponse(json);
     }
 
     void CameraStopCallback(const std::string& sid)

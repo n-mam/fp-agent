@@ -24,6 +24,30 @@ class CManager
 
     virtual void Dispatch(Json& req) = 0;
 
+    virtual std::vector<Json> GetActiveSessions(Json& json)
+    {
+      std::vector<Json> sv;
+
+      auto& it = SessionMap.begin();
+
+      while (it != SessionMap.end())
+      {
+        if (((*it).second)->IsConnected())
+        {
+          Json s;
+          s.SetKey("sid", (*it).first);
+          sv.push_back(s);
+          ++it;
+        } 
+        else
+        {
+          it = SessionMap.erase(it);
+        }
+      }
+
+      return sv;
+    }
+
     void SendResponse(Json& res)
     {
       auto r = res.Stringify();
