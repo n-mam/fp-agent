@@ -58,15 +58,36 @@ class CCameraManager : public CManager
       }
     }
 
+    SPCCamera GetTargetCamera(Json& json)
+    {
+      auto sid = json.GetKey("sid");
+
+      auto it = SessionMap.find(sid);
+
+      if (it != SessionMap.end())
+      {
+        return std::dynamic_pointer_cast<CCamera>(it->second);
+      }
+
+      return nullptr;
+    }
+
+    void SendErrorResponse(const std::string& e)
+    {
+      Json ej;
+      ej.SetKey("error", e);
+      SendResponse(ej);
+    }
+
     virtual std::vector<Json> GetActiveSessions(Json& json) override
     {
       auto sl = CManager::GetActiveSessions(json);
 
       for (auto& s : sl)
       {
-        auto sid = s.GetKey("sid");
+        auto camera = GetTargetCamera(s);
 
-        auto camera = std::dynamic_pointer_cast<CCamera>(SessionMap[sid]);
+        if (!camera) continue;
 
         bool paused = camera->IsPaused();
         bool started = camera->IsStarted();
@@ -102,11 +123,17 @@ class CCameraManager : public CManager
 
     void DeleteCameraSession(Json& json)
     {
-      auto sid = json.GetKey("sid");
+      auto camera = GetTargetCamera(json);
 
-      auto camera = std::dynamic_pointer_cast<CCamera>(SessionMap[sid]);
+      if (!camera)
+      {
+        SendErrorResponse("camera session not found");
+        return;
+      }
 
       camera->OnDisconnect();
+
+      auto sid = json.GetKey("sid");
 
       camera->Stop([this, sid](){
         CameraStopCallback(sid);
@@ -117,7 +144,13 @@ class CCameraManager : public CManager
     {
       auto sid = json.GetKey("sid");
 
-      auto camera = std::dynamic_pointer_cast<CCamera>(SessionMap[sid]);
+      auto camera = GetTargetCamera(json);
+
+      if (!camera)
+      {
+        SendErrorResponse("camera session not found");
+        return;
+      }
 
       if (camera->IsStarted() && !camera->IsPaused())
       {
@@ -145,9 +178,13 @@ class CCameraManager : public CManager
 
     void CameraPause(Json& json)
     {
-      auto sid = json.GetKey("sid");
+      auto camera = GetTargetCamera(json);
 
-      auto camera = std::dynamic_pointer_cast<CCamera>(SessionMap[sid]);
+      if (!camera)
+      {
+        SendErrorResponse("camera session not found");
+        return;
+      }
 
       if (camera->IsStarted())
       {
@@ -159,9 +196,15 @@ class CCameraManager : public CManager
 
     void CameraStop(Json& json)
     {
-      auto sid = json.GetKey("sid");
+      auto camera = GetTargetCamera(json);
 
-      auto camera = std::dynamic_pointer_cast<CCamera>(SessionMap[sid]);
+      if (!camera)
+      {
+        SendErrorResponse("camera session not found");
+        return;
+      }
+
+      auto sid = json.GetKey("sid");
 
       camera->Stop([this, sid](){
         CameraStopCallback(sid);
