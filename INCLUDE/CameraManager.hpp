@@ -18,19 +18,27 @@ class CCameraManager : public CManager
         {
           GetActiveSessions(json);
         }
-        else if (req == "camera-create")
-        {
-          CreateCameraSession(json);
-        }
-        else if (req == "camera-delete")
-        {
-          DeleteCameraSession(json);
-        }
         else if (req == "camera-control")
         {
           auto action = json.GetKey("action");
 
-          if (action == "play")
+          if (action == "create")
+          {
+            CreateCameraSession(json);
+          }
+          else if (action == "delete")
+          {
+            DeleteCameraSession(json);
+          }
+          else if (action == "start")
+          {
+            CameraStart(json);
+          }
+          else if (action == "stop")
+          {
+            CameraStop(json);
+          }
+          else if (action == "play")
           {
             CameraPlay(json);
           }
@@ -38,9 +46,9 @@ class CCameraManager : public CManager
           {
             CameraPause(json);
           }
-          else if (action == "stop")
+          else if (action == "stop-play")
           {
-            CameraStop(json);
+            CameraPause(json);
           }
           else if (action == "forward")
           {
@@ -56,27 +64,6 @@ class CCameraManager : public CManager
       {
 
       }
-    }
-
-    SPCCamera GetTargetCamera(Json& json)
-    {
-      auto sid = json.GetKey("sid");
-
-      auto it = SessionMap.find(sid);
-
-      if (it != SessionMap.end())
-      {
-        return std::dynamic_pointer_cast<CCamera>(it->second);
-      }
-
-      return nullptr;
-    }
-
-    void SendErrorResponse(const std::string& e)
-    {
-      Json ej;
-      ej.SetKey("error", e);
-      SendResponse(ej);
     }
 
     virtual std::vector<Json> GetActiveSessions(Json& json) override
@@ -140,6 +127,44 @@ class CCameraManager : public CManager
       });
     }
 
+    void CameraStart(Json& json)
+    {
+      auto camera = GetTargetCamera(json);
+
+      if (!camera)
+      {
+        SendErrorResponse("camera session not found");
+        return;
+      }
+
+      auto sid = json.GetKey("sid");
+
+      camera->Start([this, sid](){
+        CameraStopCallback(sid);
+      });
+
+      SendResponse(json);
+    }
+
+    void CameraStop(Json& json)
+    {
+      auto camera = GetTargetCamera(json);
+
+      if (!camera)
+      {
+        SendErrorResponse("camera session not found");
+        return;
+      }
+
+      auto sid = json.GetKey("sid");
+
+      camera->Stop([this, sid](){
+        CameraStopCallback(sid);
+      });
+
+      SendResponse(json);
+    }
+
     void CameraPlay(Json& json)
     {
       auto sid = json.GetKey("sid");
@@ -194,25 +219,6 @@ class CCameraManager : public CManager
       SendResponse(json);
     }
 
-    void CameraStop(Json& json)
-    {
-      auto camera = GetTargetCamera(json);
-
-      if (!camera)
-      {
-        SendErrorResponse("camera session not found");
-        return;
-      }
-
-      auto sid = json.GetKey("sid");
-
-      camera->Stop([this, sid](){
-        CameraStopCallback(sid);
-      });
-
-      SendResponse(json);
-    }
-
     void CameraStopCallback(const std::string& sid)
     {
       Json j;
@@ -221,6 +227,30 @@ class CCameraManager : public CManager
       j.SetKey("req", "camera-stop");
       SendResponse(j);
     }
+  
+  protected:
+
+    SPCCamera GetTargetCamera(Json& json)
+    {
+      auto sid = json.GetKey("sid");
+
+      auto it = SessionMap.find(sid);
+
+      if (it != SessionMap.end())
+      {
+        return std::dynamic_pointer_cast<CCamera>(it->second);
+      }
+
+      return nullptr;
+    }
+
+    void SendErrorResponse(const std::string& e)
+    {
+      Json ej;
+      ej.SetKey("error", e);
+      SendResponse(ej);
+    }
+
 };
 
 using SPCCameraManager = std::shared_ptr<CCameraManager>;
