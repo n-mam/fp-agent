@@ -52,11 +52,11 @@ class CCameraManager : public CManager
           }
           else if (action == "forward")
           {
-
+            CameraForward(json);
           }
           else if (action == "backward")
           {
-
+            CameraBackward(json);
           }
         }
       }
@@ -233,6 +233,36 @@ class CCameraManager : public CManager
       {
         camera->Pause();
       }
+
+      SendResponse(json);
+    }
+
+    void CameraForward(Json& json)
+    {
+      auto camera = GetTargetCamera(json);
+
+      if (!camera)
+      {
+        SendErrorResponse("camera session not found");
+        return;
+      }
+
+      camera->Forward();
+
+      SendResponse(json);
+    }
+
+    void CameraBackward(Json& json)
+    {
+      auto camera = GetTargetCamera(json);
+
+      if (!camera)
+      {
+        SendErrorResponse("camera session not found");
+        return;
+      }
+
+      camera->Backward();
 
       SendResponse(json);
     }
