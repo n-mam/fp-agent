@@ -48,7 +48,7 @@ class CCameraManager : public CManager
           }
           else if (action == "stop-play")
           {
-            CameraPause(json);
+            CameraStopPlay(json);
           }
           else if (action == "forward")
           {
@@ -96,6 +96,15 @@ class CCameraManager : public CManager
       auto source = json.GetKey("source");
       auto target = json.GetKey("target");
       auto tracker = json.GetKey("tracker");
+
+      if (!sid.size() || 
+          !source.size() || 
+          !target.size() || 
+          !target.size())
+      {
+        SendErrorResponse("create : invalid input");
+        return;
+      }
 
       auto camera = CVL::make_camera(source, target, tracker);
 
@@ -177,16 +186,10 @@ class CCameraManager : public CManager
         return;
       }
 
-      if (camera->IsStarted() && !camera->IsPaused())
-      {
-        return;
-      }
-
       if (!camera->IsStarted())
       {
-        camera->Start([this, sid](){
-          CameraStopCallback(sid);
-        });
+        SendErrorResponse("camera session not started");
+        return;
       }
 
       camera->Play([this, sid](const std::string& encoded){
@@ -197,6 +200,21 @@ class CCameraManager : public CManager
         j.SetKey("frame", encoded);
         SendResponse(j);
       });
+
+      SendResponse(json);
+    }
+
+    void CameraStopPlay(Json& json)
+    {
+      auto camera = GetTargetCamera(json);
+
+      if (!camera)
+      {
+        SendErrorResponse("camera session not found");
+        return;
+      }
+
+      camera->StopPlay();
 
       SendResponse(json);
     }
