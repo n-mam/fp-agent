@@ -131,9 +131,14 @@ class CCameraManager : public CManager
 
       auto sid = json.GetKey("sid");
 
-      camera->Stop([this, sid](){
-        CameraStopCallback(sid);
-      });
+      if (camera->IsStarted())
+      {
+        camera->Stop();
+      }
+
+      SessionMap.erase(sid);
+
+      SendResponse(json);
     }
 
     void CameraStart(Json& json)
@@ -148,9 +153,22 @@ class CCameraManager : public CManager
 
       auto sid = json.GetKey("sid");
 
-      camera->Start([this, sid](){
-        CameraStopCallback(sid);
-      });
+      camera->Start(
+        [this, sid](const std::string& e, const std::string& data)
+        {
+          if (e == "stop")
+          {
+            CameraStopEvent(sid);
+          }
+          else if (e == "trail")
+          {
+            CameraTrailEvent(sid, data);
+          }
+          else if (e == "play")
+          {
+            CameraPlayEvent(sid, data);
+          }
+        });
 
       SendResponse(json);
     }
@@ -167,9 +185,7 @@ class CCameraManager : public CManager
 
       auto sid = json.GetKey("sid");
 
-      camera->Stop([this, sid](){
-        CameraStopCallback(sid);
-      });
+      camera->Stop();
 
       SendResponse(json);
     }
@@ -192,14 +208,7 @@ class CCameraManager : public CManager
         return;
       }
 
-      camera->Play([this, sid](const std::string& encoded){
-        Json j;
-        j.SetKey("app", "cam");
-        j.SetKey("sid", sid);
-        j.SetKey("req", "play");
-        j.SetKey("frame", encoded);
-        SendResponse(j);
-      });
+      camera->Play();
 
       SendResponse(json);
     }
@@ -267,15 +276,6 @@ class CCameraManager : public CManager
       SendResponse(json);
     }
 
-    void CameraStopCallback(const std::string& sid)
-    {
-      Json j;
-      j.SetKey("app", "cam");
-      j.SetKey("sid", sid);
-      j.SetKey("req", "camera-stop");
-      SendResponse(j);
-    }
-  
   protected:
 
     SPCCamera GetTargetCamera(Json& json)
@@ -292,11 +292,35 @@ class CCameraManager : public CManager
       return nullptr;
     }
 
+    void CameraStopEvent(const std::string& sid)
+    {
+      Json j;
+      j.SetKey("app", "cam");
+      j.SetKey("sid", sid);
+      j.SetKey("req", "camera-stop");
+      SendResponse(j);
+    }
+  
+    void CameraTrailEvent(const std::string& sid, const std::string& trail)
+    {
+
+    }
+
+    void CameraPlayEvent(const std::string& sid, const std::string& encoded)
+    {
+      Json j;
+      j.SetKey("app", "cam");
+      j.SetKey("sid", sid);
+      j.SetKey("req", "play");
+      j.SetKey("frame", encoded);
+      SendResponse(j);
+    }
+
     void SendErrorResponse(const std::string& e)
     {
-      Json ej;
-      ej.SetKey("error", e);
-      SendResponse(ej);
+      Json j;
+      j.SetKey("error", e);
+      SendResponse(j);
     }
 
 };
