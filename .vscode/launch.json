@@ -5,27 +5,15 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "(Windows) Launch",
-            "type": "cppvsdbg",
-            "request": "launch",
-            "program": "${workspaceFolder}/build/Release/fpd.exe",
-            "args": [],
-            "stopAtEntry": true,
-            "cwd": "${workspaceFolder}",
-            "environment": [],
-            "externalConsole": false
-        },
-
-        {
-            "name": "(Windows) Launch",
+            "name": "fpd.exe 0.0.0.0 8081",
             "type": "cppvsdbg",
             "request": "launch",
             "program": "${workspaceFolder}/build/Release/fpd.exe",
             "args": ["0.0.0.0", "8081"],
-            "stopAtEntry": false,
+            "stopAtEntry": true,
             "cwd": "${workspaceFolder}",
             "environment": [],
-            "externalConsole": true
+            "externalConsole": false
         }
     ]
 }

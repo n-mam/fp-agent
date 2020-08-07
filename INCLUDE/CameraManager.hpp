@@ -100,7 +100,7 @@ class CCameraManager : public CManager
       if (!sid.size() || 
           !source.size() || 
           !target.size() || 
-          !target.size())
+          !tracker.size())
       {
         SendErrorResponse("create : invalid input");
         return;
@@ -152,9 +152,11 @@ class CCameraManager : public CManager
       }
 
       auto sid = json.GetKey("sid");
+      auto cid = json.GetKey("cid");
+      auto aid = json.GetKey("aid");
 
       camera->Start(
-        [this, sid](const std::string& e, const std::string& data)
+        [this, cid, sid, aid](const std::string& e, const std::string& data)
         {
           if (e == "stop")
           {
@@ -162,7 +164,7 @@ class CCameraManager : public CManager
           }
           else if (e == "trail")
           {
-            CameraTrailEvent(sid, data);
+            CameraTrailEvent(cid, aid, data);
           }
           else if (e == "play")
           {
@@ -301,9 +303,30 @@ class CCameraManager : public CManager
       SendResponse(j);
     }
   
-    void CameraTrailEvent(const std::string& sid, const std::string& trail)
+    void CameraTrailEvent(
+      const std::string& cid,
+      const std::string& aid,
+      const std::string& points)
     {
+      auto http = NPL::make_http_client("127.0.0.1", 8080);
 
+      http->StartClient(
+       [cid, aid, points](auto p)
+       {
+         Json j;
+         j.SetKey("api", "TRAIL");
+         j.SetKey("cid", cid);
+         j.SetKey("aid", aid);
+         j.SetKey("points", points);
+
+         auto c = std::dynamic_pointer_cast<CProtocolHTTP>(p);
+
+         if (c)
+         {
+           c->Post("/api", j.Stringify());
+         }
+       }
+      );
     }
 
     void CameraPlayEvent(const std::string& sid, const std::string& encoded)
