@@ -97,9 +97,9 @@ class CCameraManager : public CManager
       auto target = json.GetKey("target");
       auto tracker = json.GetKey("tracker");
 
-      if (!sid.size() || 
-          !source.size() || 
-          !target.size() || 
+      if (!sid.size() ||
+          !source.size() ||
+          !target.size() ||
           !tracker.size())
       {
         SendErrorResponse("create : invalid input");
@@ -108,7 +108,7 @@ class CCameraManager : public CManager
 
       auto camera = CVL::make_camera(source, target, tracker);
 
-      camera->SetName(sid);
+      //camera->SetName(sid);
 
       SessionMap.insert(std::make_pair(sid, camera));
 
@@ -154,9 +154,10 @@ class CCameraManager : public CManager
       auto sid = json.GetKey("sid");
       auto cid = json.GetKey("cid");
       auto aid = json.GetKey("aid");
+      auto uid = json.GetKey("uid");
 
       camera->Start(
-        [this, cid, sid, aid](const std::string& e, const std::string& data)
+        [this, cid, sid, aid, uid](const std::string& e, const std::string& data)
         {
           if (e == "stop")
           {
@@ -164,7 +165,7 @@ class CCameraManager : public CManager
           }
           else if (e == "trail")
           {
-            CameraTrailEvent(cid, aid, data);
+            CameraTrailEvent(cid, aid, uid, data);
           }
           else if (e == "play")
           {
@@ -306,17 +307,19 @@ class CCameraManager : public CManager
     void CameraTrailEvent(
       const std::string& cid,
       const std::string& aid,
+      const std::string& uid,
       const std::string& points)
     {
       auto http = NPL::make_http_client("127.0.0.1", 8080);
 
       http->StartClient(
-       [cid, aid, points](auto p)
+       [cid, aid, uid, points](auto p)
        {
          Json j;
          j.SetKey("api", "TRAIL");
          j.SetKey("cid", cid);
          j.SetKey("aid", aid);
+         j.SetKey("uid", uid);
          j.SetKey("points", points);
 
          auto c = std::dynamic_pointer_cast<CProtocolHTTP>(p);
