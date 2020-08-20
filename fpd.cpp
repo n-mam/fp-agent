@@ -7,15 +7,19 @@
 
 int main(int argc, char *argv[])
 {
+  std::string host = "0.0.0.0";
+  int port = 8081;
+
   if (argc != 3)
   {
     std::cout << "usage : Agent <host> <port>\n";
-    std::cout << "usage : Agent 0.0.0.0 8081\n";
-    return 0;
+    std::cout << "using : Agent 0.0.0.0 8081\n";
   }
-
-  auto host = std::string(argv[1]);
-  auto port = std::stoi(argv[2]);
+  else
+  {
+    host = std::string(argv[1]);
+    port = std::stoi(argv[2]);
+  }
 
   CManager::AddManagerToMMap("os", std::make_shared<COSManager>());
   CManager::AddManagerToMMap("cam", std::make_shared<CCameraManager>());
