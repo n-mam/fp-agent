@@ -53,7 +53,7 @@ class CFTPManager : public CManager
       auto sid = json.GetKey("sid");
       auto dir = json.GetKey("dir");
 
-      auto ftp = std::dynamic_pointer_cast<CProtocolFTP>
+      auto ftp = std::dynamic_pointer_cast<NPL::CProtocolFTP>
                      (SessionMap[sid]);
 
       ftp->ListDirectory(

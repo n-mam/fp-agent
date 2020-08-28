@@ -29,8 +29,8 @@ int main(int argc, char *argv[])
    * start websocket server
    */
   auto ws = NPL::make_ws_server(
-    host, port, TLS::YES,
-    [] (SPCProtocol c, const std::string& message) 
+    host, port, NPL::TLS::YES,
+    [] (NPL::SPCProtocol c, const std::string& message) 
     {
       std::cout << "client : " << message << "\n";
 

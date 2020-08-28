@@ -12,7 +12,7 @@ class CManager;
 using SPCManager = std::shared_ptr<CManager>;  
 
 std::map<std::string, SPCManager> ManagerMap;
-std::map<std::string, SPCSubject<uint8_t, uint8_t>> SessionMap;
+std::map<std::string, NPL::SPCSubject<uint8_t, uint8_t>> SessionMap;
 
 class CManager
 {
@@ -59,13 +59,13 @@ class CManager
       ManagerMap.insert(std::make_pair(key, value));
     }
 
-    static SPCProtocol iClient;
+    static NPL::SPCProtocol iClient;
   
   protected:
 
 };
 
-SPCProtocol CManager::iClient = nullptr;
+NPL::SPCProtocol CManager::iClient = nullptr;
 
 using WPCManager = std::weak_ptr<CManager>;
 

@@ -322,7 +322,7 @@ class CCameraManager : public CManager
          j.SetKey("uid", uid);
          j.SetKey("points", points);
 
-         auto c = std::dynamic_pointer_cast<CProtocolHTTP>(p);
+         auto c = std::dynamic_pointer_cast<NPL::CProtocolHTTP>(p);
 
          if (c)
          {
