@@ -155,9 +155,10 @@ class CCameraManager : public CManager
       auto cid = json.GetKey("cid");
       auto aid = json.GetKey("aid");
       auto uid = json.GetKey("uid");
+      auto aep = json.GetKey("aep");
 
       camera->Start(
-        [this, cid, sid, aid, uid](const std::string& e, const std::string& data)
+        [this, cid, sid, aid, uid, aep](const std::string& e, const std::string& data)
         {
           if (e == "stop")
           {
@@ -165,7 +166,7 @@ class CCameraManager : public CManager
           }
           else if (e == "trail")
           {
-            CameraTrailEvent(cid, aid, uid, data);
+            CameraTrailEvent(cid, aid, uid, data, aep);
           }
           else if (e == "play")
           {
@@ -308,9 +309,13 @@ class CCameraManager : public CManager
       const std::string& cid,
       const std::string& aid,
       const std::string& uid,
-      const std::string& points)
+      const std::string& points,
+      const std::string& aep)
     {
-      auto http = NPL::make_http_client("127.0.0.1", 8080);
+      auto http = NPL::make_http_client(
+        (aep == "localhost") ?
+           "127.0.0.1" : "52.66.251.154",
+        8080);
 
       http->StartClient(
        [cid, aid, uid, points](auto p)
