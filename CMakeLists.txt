@@ -2,10 +2,10 @@ project (fpd)
 
 find_package(Threads REQUIRED)
 find_package(OpenCV REQUIRED)
+find_package(OpenSSL REQUIRED)
 
-if (UNIX)
-  find_package(OpenSSL REQUIRED)
-endif (UNIX)
+#SET OPENCV_DIR=C:/opencv/build/install
+#SET OPENSSL_ROOT_DIR=C:/vcpkg/installed/x64-windows
 
 ADD_EXECUTABLE(fpd fpd.cpp)
 
@@ -34,8 +34,89 @@ TARGET_INCLUDE_DIRECTORIES(
  ${CMAKE_SOURCE_DIR}/../cpp-cvl/INCLUDE
 )
 
+TARGET_LINK_LIBRARIES(fpd ${CMAKE_THREAD_LIBS_INIT} ${OpenCV_LIBS} OpenSSL::SSL Ws2_32.lib)
+
+# NSIS installer logic for windows
+
 if (WIN32)
-  TARGET_LINK_LIBRARIES(fpd Ws2_32.lib ${OpenCV_LIBS} ${CMAKE_THREAD_LIBS_INIT})
-else()
-  TARGET_LINK_LIBRARIES(fpd ${CMAKE_THREAD_LIBS_INIT} ${CMAKE_THREAD_LIBS_INIT} OpenSSL::SSL)
+
+SET(CMAKE_INSTALL_DEBUG_LIBRARIES TRUE)
+SET(CMAKE_INSTALL_PREFIX ${CMAKE_SOURCE_DIR}/build/install)
+
+# Include this module to search for compiler-provided system runtime libraries 
+# and add install rules for them. Some optional variables may be set PRIOR to 
+# including the module to adjust behavior
+
+include(InstallRequiredSystemLibraries)
+
+install(
+  PROGRAMS
+  $ENV{OPENSSL_ROOT_DIR}/bin/libssl-1_1-x64.dll
+  $ENV{OPENSSL_ROOT_DIR}/bin/libcrypto-1_1-x64.dll
+  $ENV{OPENCV_DIR}/x64/vc16/bin/opencv_world440.dll
+  $ENV{OPENCV_DIR}/x64/vc16/bin/opencv_videoio_ffmpeg440_64.dll
+  "C:/PROGRA~2/IntelSWTools/compilers_and_libraries/windows/redist/intel64_win/tbb/vc_mt/tbb.dll"
+  "C:/PROGRA~2/IntelSWTools/compilers_and_libraries/windows/redist/intel64_win/compiler/libiomp5md.dll"
+  DESTINATION
+  bin
+)
+
+install(
+  FILES
+  ${CMAKE_SOURCE_DIR}/../cpp-cvl/MODELS/age_net.caffemodel
+  ${CMAKE_SOURCE_DIR}/../cpp-cvl/MODELS/deploy_age.prototxt
+  ${CMAKE_SOURCE_DIR}/../cpp-cvl/MODELS/deploy_gender.prototxt
+  ${CMAKE_SOURCE_DIR}/../cpp-cvl/MODELS/gender_net.caffemodel
+  ${CMAKE_SOURCE_DIR}/../cpp-cvl/MODELS/MobileNetSSD_deploy.caffemodel
+  ${CMAKE_SOURCE_DIR}/../cpp-cvl/MODELS/MobileNetSSD_deploy.prototxt
+  ${CMAKE_SOURCE_DIR}/../cpp-cvl/MODELS/ResNetSSD_deploy.caffemodel
+  ${CMAKE_SOURCE_DIR}/../cpp-cvl/MODELS/ResNetSSD_deploy.prototxt
+  DESTINATION
+  cpp-cvl/MODELS
+)
+
+install(TARGETS fpd)
+
+# Start after install checkbox
+#set(CPACK_NSIS_MUI_FINISHPAGE_RUN "fpd.exe")
+
+# Uninstall first, then install
+set(CPACK_NSIS_ENABLE_UNINSTALL_BEFORE_INSTALL ON)
+
+# Kill before uninstall
+set(CPACK_NSIS_EXTRA_UNINSTALL_COMMANDS "ExecWait 'Taskkill /F /IM fpd.exe'")
+
+# Kill before install
+set(CPACK_NSIS_EXTRA_PREINSTALL_COMMANDS "ExecWait 'Taskkill /F /IM fpd.exe'")
+
+SET(CPACK_NSIS_MUI_ICON "${CMAKE_SOURCE_DIR}/foxpad.ico")
+
+SET(CPACK_NSIS_MUI_UNIICON "${CMAKE_SOURCE_DIR}/foxpad.ico")
+
+# Icon in the add-remove control panel. Must be in an .exe file
+set(CPACK_NSIS_INSTALLED_ICON_NAME "bin\\\\fpd.exe")
+
+# License file
+set(CPACK_RESOURCE_FILE_LICENSE ${CMAKE_SOURCE_DIR}/license.txt)
+
+set(CPACK_GENERATOR NSIS)
+set(CPACK_PACKAGE_NAME "Agent")
+set(CPACK_PACKAGE_VENDOR "Divya Surana")
+set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "FP Agent")
+set(CPACK_PACKAGE_VERSION "1.0.0")
+set(CPACK_PACKAGE_VERSION_MAJOR "1")
+set(CPACK_PACKAGE_VERSION_MINOR "0")
+set(CPACK_PACKAGE_VERSION_PATCH "0")
+set(CPACK_PACKAGE_INSTALL_DIRECTORY "Foxpad")
+
+set(CPACK_NSIS_EXTRA_INSTALL_COMMANDS "
+  CreateShortCut \\\"$DESKTOP\\\\fpd.lnk\\\" \\\"$INSTDIR\\\\bin\\\\fpd.exe\\\"
+")
+
+set(CPACK_NSIS_EXTRA_UNINSTALL_COMMANDS "
+  Delete \\\"$DESKTOP\\\\fpd.lnk\\\"
+")
+
+INCLUDE(CPack)
+
 endif (WIN32)
