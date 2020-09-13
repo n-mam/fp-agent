@@ -43,10 +43,17 @@ if (WIN32)
 SET(CMAKE_INSTALL_DEBUG_LIBRARIES TRUE)
 SET(CMAKE_INSTALL_PREFIX ${CMAKE_SOURCE_DIR}/build/install)
 
+install(
+  TARGETS 
+  fpd 
+  DESTINATION 
+  ${CPACK_NSIS_INSTALL_ROOT}/${CPACK_PACKAGE_INSTALL_DIRECTORY}
+)
+
 # Include this module to search for compiler-provided system runtime libraries 
 # and add install rules for them. Some optional variables may be set PRIOR to 
 # including the module to adjust behavior
-
+SET(CMAKE_INSTALL_SYSTEM_RUNTIME_DESTINATION ${CPACK_NSIS_INSTALL_ROOT}/${CPACK_PACKAGE_INSTALL_DIRECTORY})
 include(InstallRequiredSystemLibraries)
 
 install(
@@ -58,7 +65,7 @@ install(
   "C:/PROGRA~2/IntelSWTools/compilers_and_libraries/windows/redist/intel64_win/tbb/vc_mt/tbb.dll"
   "C:/PROGRA~2/IntelSWTools/compilers_and_libraries/windows/redist/intel64_win/compiler/libiomp5md.dll"
   DESTINATION
-  bin
+  ${CPACK_NSIS_INSTALL_ROOT}/${CPACK_PACKAGE_INSTALL_DIRECTORY}
 )
 
 install(
@@ -72,10 +79,8 @@ install(
   ${CMAKE_SOURCE_DIR}/../cpp-cvl/MODELS/ResNetSSD_deploy.caffemodel
   ${CMAKE_SOURCE_DIR}/../cpp-cvl/MODELS/ResNetSSD_deploy.prototxt
   DESTINATION
-  cpp-cvl/MODELS
+  MODELS
 )
-
-install(TARGETS fpd)
 
 # Start after install checkbox
 #set(CPACK_NSIS_MUI_FINISHPAGE_RUN "fpd.exe")
@@ -110,7 +115,7 @@ set(CPACK_PACKAGE_VERSION_PATCH "0")
 set(CPACK_PACKAGE_INSTALL_DIRECTORY "Foxpad")
 
 set(CPACK_NSIS_EXTRA_INSTALL_COMMANDS "
-  CreateShortCut \\\"$DESKTOP\\\\fpd.lnk\\\" \\\"$INSTDIR\\\\bin\\\\fpd.exe\\\"
+  CreateShortCut \\\"$DESKTOP\\\\fpd.lnk\\\" \\\"$INSTDIR\\\\fpd.exe\\\"
 ")
 
 set(CPACK_NSIS_EXTRA_UNINSTALL_COMMANDS "
