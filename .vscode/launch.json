@@ -5,15 +5,15 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "fpd.exe 0.0.0.0 8081",
+            "name": "fpd",
             "type": "cppvsdbg",
             "request": "launch",
             "program": "${workspaceFolder}/build/Release/fpd.exe",
-            "args": ["0.0.0.0", "8081"],
-            "stopAtEntry": true,
-            "cwd": "${workspaceFolder}",
-            "environment": [],
-            "externalConsole": false
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}/build",
+            "environment": [{"name": "cpp-cvl-test", "value": "ooo"}],
+            "externalConsole": true
         }
     ]
 }

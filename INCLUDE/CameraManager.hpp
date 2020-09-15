@@ -58,6 +58,15 @@ class CCameraManager : public CManager
           {
             CameraBackward(json);
           }
+          else if (action == "set-property")
+          {
+            CameraSetProperty(json);
+          }
+          else if (action == "get-property")
+          {
+            CameraGetProperty(json);
+          }
+
         }
       }
       else
@@ -280,6 +289,29 @@ class CCameraManager : public CManager
       SendResponse(json);
     }
 
+    void CameraSetProperty(Json& json)
+    {
+      auto camera = GetTargetCamera(json);
+
+      if (!camera)
+      {
+        SendErrorResponse("camera session not found");
+        return;
+      }
+
+      auto prop = json.GetKey("prop");
+      auto value = json.GetKey("value");
+
+      camera->SetProperty(prop, value);
+
+      SendResponse(json);
+    }
+
+    void CameraGetProperty(Json& json)
+    {
+
+    }
+  
   protected:
 
     SPCCamera GetTargetCamera(Json& json)
