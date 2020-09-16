@@ -314,8 +314,10 @@ class CCameraManager : public CManager
         SendErrorResponse("camera session not found");
         return;
       }
-
-      json[prop] = camera->SetProperty(prop, value);
+      
+      auto prop = json.GetKey("prop");
+      
+      json.SetKey(prop, camera->GetProperty(prop));
 
       SendResponse(json);
     }
