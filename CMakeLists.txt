@@ -1,5 +1,5 @@
 project (fpd)
-
+#set(CMAKE_VERBOSE_MAKEFILE ON)
 find_package(Threads REQUIRED)
 find_package(OpenCV REQUIRED)
 find_package(OpenSSL REQUIRED)
@@ -13,7 +13,7 @@ SET_PROPERTY(TARGET fpd PROPERTY CXX_STANDARD 17)
 
 if (WIN32)
 
-  SET (CMAKE_CXX_FLAGS "/Zi /Od")
+  SET (CMAKE_CXX_FLAGS_RELEASE "/Zi /Od")
 
   SET_TARGET_PROPERTIES(
    fpd PROPERTIES 

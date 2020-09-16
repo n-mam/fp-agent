@@ -117,6 +117,13 @@ class CCameraManager : public CManager
 
       auto camera = CVL::make_camera(source, target, tracker);
 
+      auto bbarea = json.GetKey("bbarea");
+      if (bbarea.size()) camera->SetProperty("bbarea", bbarea);
+      auto exhzbb = json.GetKey("exhzbb");
+      if (exhzbb.size()) camera->SetProperty("exhzbb", exhzbb);
+      auto skipcount = json.GetKey("skipcount");
+      if (skipcount.size()) camera->SetProperty("skipcount", skipcount);
+
       SessionMap.insert(std::make_pair(sid, camera));
 
       camera->OnConnect();
@@ -314,9 +321,9 @@ class CCameraManager : public CManager
         SendErrorResponse("camera session not found");
         return;
       }
-      
+
       auto prop = json.GetKey("prop");
-      
+
       json.SetKey(prop, camera->GetProperty(prop));
 
       SendResponse(json);
