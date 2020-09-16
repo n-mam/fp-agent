@@ -117,8 +117,6 @@ class CCameraManager : public CManager
 
       auto camera = CVL::make_camera(source, target, tracker);
 
-      //camera->SetName(sid);
-
       SessionMap.insert(std::make_pair(sid, camera));
 
       camera->OnConnect();
@@ -309,7 +307,17 @@ class CCameraManager : public CManager
 
     void CameraGetProperty(Json& json)
     {
+      auto camera = GetTargetCamera(json);
 
+      if (!camera)
+      {
+        SendErrorResponse("camera session not found");
+        return;
+      }
+
+      json[prop] = camera->SetProperty(prop, value);
+
+      SendResponse(json);
     }
   
   protected:
