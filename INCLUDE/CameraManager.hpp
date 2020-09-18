@@ -104,6 +104,7 @@ class CCameraManager : public CManager
       auto sid = json.GetKey("sid");
       auto source = json.GetKey("source");
       auto target = json.GetKey("target");
+      auto algo = json.GetKey("algo");
       auto tracker = json.GetKey("tracker");
 
       if (!sid.size() ||
@@ -115,7 +116,7 @@ class CCameraManager : public CManager
         return;
       }
 
-      auto camera = CVL::make_camera(source, target, tracker);
+      auto camera = CVL::make_camera(source, target, algo, tracker);
 
       auto bbarea = json.GetKey("bbarea");
       if (bbarea.size()) camera->SetProperty("bbarea", bbarea);
