@@ -403,7 +403,6 @@ class CCameraManager : public CManager
       j.SetKey("error", e);
       SendResponse(j);
     }
-
 };
 
 using SPCCameraManager = std::shared_ptr<CCameraManager>;

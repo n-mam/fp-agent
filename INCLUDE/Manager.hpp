@@ -12,6 +12,7 @@ class CManager;
 using SPCManager = std::shared_ptr<CManager>;  
 
 std::map<std::string, SPCManager> ManagerMap;
+
 std::map<std::string, NPL::SPCSubject<uint8_t, uint8_t>> SessionMap;
 
 class CManager
