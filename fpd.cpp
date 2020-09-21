@@ -40,8 +40,9 @@ int main(int argc, char *argv[])
 
       if (key.length())
       {
-        CManager::iClient = c;
-        ManagerMap[key]->Dispatch(json);
+        auto& manager = ManagerMap[key];
+        manager->AddClient(c);
+        manager->Dispatch(c, json);
       }
       else
       {

@@ -7,7 +7,7 @@ class CFTPManager : public CManager
 {
   public:
 
-    void Dispatch(Json& json) override
+    void Dispatch(NPL::SPCProtocol c, Json& json) override
     {
       if (json.HasKey("req"))
       {

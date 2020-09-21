@@ -1,14 +1,14 @@
 #ifndef CAMERAMANAGER_HPP
 #define CAMERAMANAGER_HPP
 
-#include <Manager.hpp>
 #include <cvl.hpp>
+#include <Manager.hpp>
 
 class CCameraManager : public CManager
 {
   public:
 
-    void Dispatch(Json& json) override
+    void Dispatch(NPL::SPCProtocol c, Json& json) override
     {
       if (json.HasKey("req"))
       {
@@ -66,13 +66,22 @@ class CCameraManager : public CManager
           {
             CameraGetProperty(json);
           }
-
+          else
+          {
+            json.SetKey("error", "Unknown action : " + action);
+          }
+        }
+        else
+        {
+          json.SetKey("error", "Unknown request : " + req);
         }
       }
       else
       {
-
+        json.SetKey("error", "Request missing");
       }
+
+      SendResponse(json);
     }
 
     virtual std::vector<Json> GetActiveSessions(Json& json) override
@@ -112,7 +121,7 @@ class CCameraManager : public CManager
           !target.size() ||
           !tracker.size())
       {
-        SendErrorResponse("create : invalid input");
+        json.SetKey("error", "create : invalid input");
         return;
       }
 
@@ -128,8 +137,6 @@ class CCameraManager : public CManager
       SessionMap.insert(std::make_pair(sid, camera));
 
       camera->OnConnect();
-
-      SendResponse(json);
     }
 
     void DeleteCameraSession(Json& json)
@@ -138,7 +145,7 @@ class CCameraManager : public CManager
 
       if (!camera)
       {
-        SendErrorResponse("camera session not found");
+        json.SetKey("error", "camera session not found");
         return;
       }
 
@@ -152,8 +159,6 @@ class CCameraManager : public CManager
       }
 
       SessionMap.erase(sid);
-
-      SendResponse(json);
     }
 
     void CameraStart(Json& json)
@@ -162,7 +167,7 @@ class CCameraManager : public CManager
 
       if (!camera)
       {
-        SendErrorResponse("camera session not found");
+        json.SetKey("error", "camera session not found");
         return;
       }
 
@@ -188,8 +193,6 @@ class CCameraManager : public CManager
             CameraPlayEvent(sid, data);
           }
         });
-
-      SendResponse(json);
     }
 
     void CameraStop(Json& json)
@@ -198,15 +201,13 @@ class CCameraManager : public CManager
 
       if (!camera)
       {
-        SendErrorResponse("camera session not found");
+        json.SetKey("error", "camera session not found");
         return;
       }
 
       auto sid = json.GetKey("sid");
 
       camera->Stop();
-
-      SendResponse(json);
     }
 
     void CameraPlay(Json& json)
@@ -217,19 +218,17 @@ class CCameraManager : public CManager
 
       if (!camera)
       {
-        SendErrorResponse("camera session not found");
+        json.SetKey("error", "camera session not found");
         return;
       }
 
       if (!camera->IsStarted())
       {
-        SendErrorResponse("camera session not started");
+        json.SetKey("error", "camera session not started");
         return;
       }
 
       camera->Play();
-
-      SendResponse(json);
     }
 
     void CameraStopPlay(Json& json)
@@ -238,13 +237,11 @@ class CCameraManager : public CManager
 
       if (!camera)
       {
-        SendErrorResponse("camera session not found");
+        json.SetKey("error", "camera session not found");
         return;
       }
 
       camera->StopPlay();
-
-      SendResponse(json);
     }
 
     void CameraPause(Json& json)
@@ -253,7 +250,7 @@ class CCameraManager : public CManager
 
       if (!camera)
       {
-        SendErrorResponse("camera session not found");
+        json.SetKey("error", "camera session not found");
         return;
       }
 
@@ -261,8 +258,6 @@ class CCameraManager : public CManager
       {
         camera->Pause();
       }
-
-      SendResponse(json);
     }
 
     void CameraForward(Json& json)
@@ -271,13 +266,11 @@ class CCameraManager : public CManager
 
       if (!camera)
       {
-        SendErrorResponse("camera session not found");
+        json.SetKey("error", "camera session not found");
         return;
       }
 
       camera->Forward();
-
-      SendResponse(json);
     }
 
     void CameraBackward(Json& json)
@@ -286,13 +279,11 @@ class CCameraManager : public CManager
 
       if (!camera)
       {
-        SendErrorResponse("camera session not found");
+        json.SetKey("error", "camera session not found");
         return;
       }
 
       camera->Backward();
-
-      SendResponse(json);
     }
 
     void CameraSetProperty(Json& json)
@@ -301,7 +292,7 @@ class CCameraManager : public CManager
 
       if (!camera)
       {
-        SendErrorResponse("camera session not found");
+        json.SetKey("error", "camera session not found");
         return;
       }
 
@@ -309,8 +300,6 @@ class CCameraManager : public CManager
       auto value = json.GetKey("value");
 
       camera->SetProperty(prop, value);
-
-      SendResponse(json);
     }
 
     void CameraGetProperty(Json& json)
@@ -319,15 +308,13 @@ class CCameraManager : public CManager
 
       if (!camera)
       {
-        SendErrorResponse("camera session not found");
+        json.SetKey("error", "camera session not found");
         return;
       }
 
       auto prop = json.GetKey("prop");
 
       json.SetKey(prop, camera->GetProperty(prop));
-
-      SendResponse(json);
     }
   
   protected:

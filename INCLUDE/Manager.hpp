@@ -1,6 +1,7 @@
 #ifndef MANAGER_HPP
 #define MANAGER_HPP
 
+#include <set>
 #include <memory>
 #include <vector>
 #include <assert.h>
@@ -23,7 +24,12 @@ class CManager
 
     ~CManager() {}
 
-    virtual void Dispatch(Json& req) = 0;
+    virtual void Dispatch(NPL::SPCProtocol client, Json& req) = 0;
+
+    virtual void AddClient(NPL::SPCProtocol client)
+    {
+      auto& result = iClients.insert(client);
+    }
 
     virtual std::vector<Json> GetActiveSessions(Json& json)
     {
@@ -52,7 +58,11 @@ class CManager
     void SendResponse(Json& res)
     {
       auto r = res.Stringify();
-      iClient->SendProtocolMessage((uint8_t *)r.data(), r.size());   
+
+      for (auto& client : iClients)
+      {
+        client->SendProtocolMessage((uint8_t *)r.data(), r.size());  
+      }
     }
 
     static void AddManagerToMMap(const std::string& key, SPCManager value)
@@ -60,13 +70,11 @@ class CManager
       ManagerMap.insert(std::make_pair(key, value));
     }
 
-    static NPL::SPCProtocol iClient;
-  
+    std::set<NPL::SPCProtocol> iClients;
+
   protected:
 
 };
-
-NPL::SPCProtocol CManager::iClient = nullptr;
 
 using WPCManager = std::weak_ptr<CManager>;
 
