@@ -1,10 +1,10 @@
 project (fpd)
-#set(CMAKE_VERBOSE_MAKEFILE ON)
+
+# set(CMAKE_VERBOSE_MAKEFILE ON)
+
 find_package(Threads REQUIRED)
-find_package(OpenCV REQUIRED)
 find_package(OpenSSL REQUIRED)
 
-# SET OPENCV_DIR=C:/opencv/build/install
 # SET OPENSSL_ROOT_DIR=C:/vcpkg/installed/x64-windows
 
 ADD_EXECUTABLE(fpd fpd.cpp)
@@ -30,11 +30,13 @@ TARGET_INCLUDE_DIRECTORIES(
  ${CMAKE_SOURCE_DIR}/INCLUDE
  ${CMAKE_SOURCE_DIR}/../cpp-npl
  ${CMAKE_SOURCE_DIR}/../cpp-npl/INCLUDE
- ${CMAKE_SOURCE_DIR}/../cpp-cvl
- ${CMAKE_SOURCE_DIR}/../cpp-cvl/INCLUDE
+ ${CMAKE_SOURCE_DIR}/../cpp-ovl
+ ${CMAKE_SOURCE_DIR}/../cpp-ovl/INCLUDE
 )
 
-TARGET_LINK_LIBRARIES(fpd ${CMAKE_THREAD_LIBS_INIT} ${OpenCV_LIBS} OpenSSL::SSL Ws2_32.lib)
+SET(OVL_LIBS "pt fr ag")
+
+TARGET_LINK_LIBRARIES(fpd ${CMAKE_THREAD_LIBS_INIT} ${OV_LIBS} OpenSSL::SSL Ws2_32.lib)
 
 # NSIS installer logic for windows
 
