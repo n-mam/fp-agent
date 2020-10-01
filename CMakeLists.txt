@@ -1,14 +1,16 @@
 project (fpd)
 
-# set(CMAKE_VERBOSE_MAKEFILE ON)
+set(CMAKE_VERBOSE_MAKEFILE ON)
 
 find_package(Threads REQUIRED)
+find_package(OpenCV REQUIRED)
 find_package(OpenSSL REQUIRED)
 
 # SET OPENSSL_ROOT_DIR=C:/vcpkg/installed/x64-windows
 
 ADD_EXECUTABLE(fpd fpd.cpp)
 
+target_compile_definitions(fpd PUBLIC OPENVINO)
 SET_PROPERTY(TARGET fpd PROPERTY CXX_STANDARD 17)
 
 if (WIN32)
@@ -26,24 +28,34 @@ endif (WIN32)
 TARGET_INCLUDE_DIRECTORIES(
  fpd
  PRIVATE
- ${CMAKE_SOURCE_DIR}
- ${CMAKE_SOURCE_DIR}/INCLUDE
- ${CMAKE_SOURCE_DIR}/../cpp-npl
- ${CMAKE_SOURCE_DIR}/../cpp-npl/INCLUDE
- ${CMAKE_SOURCE_DIR}/../cpp-ovl
- ${CMAKE_SOURCE_DIR}/../cpp-ovl/INCLUDE
+ ${CMAKE_CURRENT_SOURCE_DIR}
+ ${CMAKE_CURRENT_SOURCE_DIR}/INCLUDE
+ ${CMAKE_CURRENT_SOURCE_DIR}/../cpp-npl
+ ${CMAKE_CURRENT_SOURCE_DIR}/../cpp-npl/INCLUDE
+ ${CMAKE_CURRENT_SOURCE_DIR}/../cpp-cvl
+ ${CMAKE_CURRENT_SOURCE_DIR}/../cpp-cvl/INCLUDE
 )
 
 SET(OVL_LIBS "pt fr ag")
 
-TARGET_LINK_LIBRARIES(fpd ${CMAKE_THREAD_LIBS_INIT} ${OV_LIBS} OpenSSL::SSL Ws2_32.lib)
+TARGET_LINK_LIBRARIES(
+  fpd 
+  fd
+  pt
+  fr
+  ${OV_LIBS} 
+  ${OpenCV_LIBS} 
+  OpenSSL::SSL 
+  ${CMAKE_THREAD_LIBS_INIT} 
+  Ws2_32.lib
+)
 
 # NSIS installer logic for windows
 
 if (WIN32)
 
 SET(CMAKE_INSTALL_DEBUG_LIBRARIES TRUE)
-SET(CMAKE_INSTALL_PREFIX ${CMAKE_SOURCE_DIR}/build/install)
+SET(CMAKE_INSTALL_PREFIX ${CMAKE_CURRENT_SOURCE_DIR}/build/install)
 
 install(
   TARGETS 
@@ -72,14 +84,14 @@ install(
 
 install(
   FILES
-  ${CMAKE_SOURCE_DIR}/../cpp-cvl/MODELS/age_net.caffemodel
-  ${CMAKE_SOURCE_DIR}/../cpp-cvl/MODELS/deploy_age.prototxt
-  ${CMAKE_SOURCE_DIR}/../cpp-cvl/MODELS/deploy_gender.prototxt
-  ${CMAKE_SOURCE_DIR}/../cpp-cvl/MODELS/gender_net.caffemodel
-  ${CMAKE_SOURCE_DIR}/../cpp-cvl/MODELS/MobileNetSSD_deploy.caffemodel
-  ${CMAKE_SOURCE_DIR}/../cpp-cvl/MODELS/MobileNetSSD_deploy.prototxt
-  ${CMAKE_SOURCE_DIR}/../cpp-cvl/MODELS/ResNetSSD_deploy.caffemodel
-  ${CMAKE_SOURCE_DIR}/../cpp-cvl/MODELS/ResNetSSD_deploy.prototxt
+  ${CMAKE_CURRENT_SOURCE_DIR}/../cpp-cvl/MODELS/age_net.caffemodel
+  ${CMAKE_CURRENT_SOURCE_DIR}/../cpp-cvl/MODELS/deploy_age.prototxt
+  ${CMAKE_CURRENT_SOURCE_DIR}/../cpp-cvl/MODELS/deploy_gender.prototxt
+  ${CMAKE_CURRENT_SOURCE_DIR}/../cpp-cvl/MODELS/gender_net.caffemodel
+  ${CMAKE_CURRENT_SOURCE_DIR}/../cpp-cvl/MODELS/MobileNetSSD_deploy.caffemodel
+  ${CMAKE_CURRENT_SOURCE_DIR}/../cpp-cvl/MODELS/MobileNetSSD_deploy.prototxt
+  ${CMAKE_CURRENT_SOURCE_DIR}/../cpp-cvl/MODELS/ResNetSSD_deploy.caffemodel
+  ${CMAKE_CURRENT_SOURCE_DIR}/../cpp-cvl/MODELS/ResNetSSD_deploy.prototxt
   DESTINATION
   MODELS
 )
@@ -96,15 +108,15 @@ set(CPACK_NSIS_EXTRA_UNINSTALL_COMMANDS "ExecWait 'Taskkill /F /IM fpd.exe'")
 # Kill before install
 set(CPACK_NSIS_EXTRA_PREINSTALL_COMMANDS "ExecWait 'Taskkill /F /IM fpd.exe'")
 
-SET(CPACK_NSIS_MUI_ICON "${CMAKE_SOURCE_DIR}/foxpad.ico")
+SET(CPACK_NSIS_MUI_ICON "${CMAKE_CURRENT_SOURCE_DIR}/foxpad.ico")
 
-SET(CPACK_NSIS_MUI_UNIICON "${CMAKE_SOURCE_DIR}/foxpad.ico")
+SET(CPACK_NSIS_MUI_UNIICON "${CMAKE_CURRENT_SOURCE_DIR}/foxpad.ico")
 
 # Icon in the add-remove control panel. Must be in an .exe file
 set(CPACK_NSIS_INSTALLED_ICON_NAME "bin\\\\fpd.exe")
 
 # License file
-set(CPACK_RESOURCE_FILE_LICENSE ${CMAKE_SOURCE_DIR}/license.txt)
+set(CPACK_RESOURCE_FILE_LICENSE ${CMAKE_CURRENT_SOURCE_DIR}/license.txt)
 
 set(CPACK_GENERATOR NSIS)
 set(CPACK_PACKAGE_NAME "Agent")
