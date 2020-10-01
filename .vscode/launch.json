@@ -8,10 +8,10 @@
             "name": "fpd",
             "type": "cppvsdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/build/Release/fpd.exe",
+            "program": "${workspaceFolder}/../build/intel64/Release/fpd.exe",
             "args": [],
             "stopAtEntry": false,
-            "cwd": "${workspaceFolder}/build",
+            "cwd": "${workspaceFolder}/../build",
             "environment": [{"name": "cpp-cvl-test", "value": "ooo"}],
             "externalConsole": true
         }

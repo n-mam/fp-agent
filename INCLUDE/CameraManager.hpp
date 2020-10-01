@@ -3,6 +3,7 @@
 
 #include <cvl.hpp>
 #include <Manager.hpp>
+#include <Encryption.hpp>
 
 class CCameraManager : public CManager
 {
@@ -125,7 +126,11 @@ class CCameraManager : public CManager
         return;
       }
 
-      auto camera = CVL::make_camera(source, target, algo, tracker);
+      #ifdef OPENVINO
+        auto camera = CVL::make_camera(source, target);
+      #else
+        auto camera = CVL::make_camera(source, target, algo, tracker);
+      #endif
 
       auto bbarea = json.GetKey("bbarea");
       if (bbarea.size()) camera->SetProperty("bbarea", bbarea);
@@ -178,7 +183,7 @@ class CCameraManager : public CManager
       auto aep = json.GetKey("aep");
 
       camera->Start(
-        [this, cid, sid, aid, uid, aep](const std::string& e, const std::string& data)
+        [this, cid, sid, aid, uid, aep](const std::string& e, const std::string& data, std::vector<uint8_t>& frame)
         {
           if (e == "stop")
           {
@@ -190,7 +195,7 @@ class CCameraManager : public CManager
           }
           else if (e == "play")
           {
-            CameraPlayEvent(sid, data);
+            CameraPlayEvent(sid, frame);
           }
         });
     }
@@ -374,12 +379,14 @@ class CCameraManager : public CManager
       );
     }
 
-    void CameraPlayEvent(const std::string& sid, const std::string& encoded)
+    void CameraPlayEvent(const std::string& sid, std::vector<uint8_t>& frame)
     {
       Json j;
       j.SetKey("app", "cam");
       j.SetKey("sid", sid);
       j.SetKey("req", "play");
+      char encoded[360*500];
+      int n = Base64Encode((unsigned char *)encoded, frame.data(), frame.size());
       j.SetKey("frame", encoded);
       SendResponse(j);
     }
