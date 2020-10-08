@@ -5,13 +5,24 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "fpd",
+            "name": "fpd openvino",
             "type": "cppvsdbg",
             "request": "launch",
             "program": "${workspaceFolder}/../build/intel64/Release/fpd.exe",
             "args": [],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}/../build",
+            "environment": [{"name": "cpp-cvl-test", "value": "ooo"}],
+            "externalConsole": true
+        },
+        {
+            "name": "fpd opencv",
+            "type": "cppvsdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/build/Release/fpd.exe",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}/build",
             "environment": [{"name": "cpp-cvl-test", "value": "ooo"}],
             "externalConsole": true
         }
