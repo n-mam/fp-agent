@@ -10,7 +10,6 @@ find_package(OpenSSL REQUIRED)
 
 ADD_EXECUTABLE(fpd fpd.cpp)
 
-target_compile_definitions(fpd PUBLIC OPENVINO)
 SET_PROPERTY(TARGET fpd PROPERTY CXX_STANDARD 17)
 
 if (WIN32)
@@ -36,19 +35,22 @@ TARGET_INCLUDE_DIRECTORIES(
  ${CMAKE_CURRENT_SOURCE_DIR}/../cpp-cvl/INCLUDE
 )
 
-SET(OVL_LIBS "pt fr ag")
-
 TARGET_LINK_LIBRARIES(
-  fpd 
-  fd
-  pt
-  fr
-  ${OV_LIBS} 
-  ${OpenCV_LIBS} 
-  OpenSSL::SSL 
-  ${CMAKE_THREAD_LIBS_INIT} 
+  fpd
+  ${OpenCV_LIBS}
+  OpenSSL::SSL
+  ${CMAKE_THREAD_LIBS_INIT}
   Ws2_32.lib
 )
+
+if(OPENVINO)
+ TARGET_LINK_LIBRARIES(
+   fpd
+   fd
+   pt
+   fr
+ )
+endif (OPENVINO)
 
 # NSIS installer logic for windows
 
