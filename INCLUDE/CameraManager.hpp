@@ -176,6 +176,12 @@ class CCameraManager : public CManager
         return;
       }
 
+      if (camera->IsStarted())
+      {
+        json.SetKey("error", "camera session already started");
+        return;
+      }
+
       auto sid = json.GetKey("sid");
       auto cid = json.GetKey("cid");
       auto aid = json.GetKey("aid");
@@ -207,6 +213,12 @@ class CCameraManager : public CManager
       if (!camera)
       {
         json.SetKey("error", "camera session not found");
+        return;
+      }
+
+      if (!camera->IsStarted())
+      {
+        json.SetKey("error", "camera session not started");
         return;
       }
 
