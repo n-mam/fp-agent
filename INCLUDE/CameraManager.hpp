@@ -197,7 +197,7 @@ class CCameraManager : public CManager
           }
           else if (e == "trail")
           {
-            CameraTrailEvent(cid, aid, uid, data1, data2, aep);
+            CameraTrailEvent(cid, aid, uid, data1, data2, frame, aep);
           }
           else if (e == "play")
           {
@@ -353,8 +353,8 @@ class CCameraManager : public CManager
     void CameraStopEvent(const std::string& sid)
     {
       Json j;
-      j.SetKey("app", "cam");
       j.SetKey("sid", sid);
+      j.SetKey("app", "cam");
       j.SetKey("req", "camera-stop");
       SendResponse(j);
     }
@@ -365,6 +365,7 @@ class CCameraManager : public CManager
       const std::string& uid,
       const std::string& points,
       const std::string& demography,
+      const std::vector<uint8_t>& thumb,
       const std::string& aep)
     {
       auto http = NPL::make_http_client(
@@ -373,7 +374,7 @@ class CCameraManager : public CManager
         8080);
 
       http->StartClient(
-       [cid, aid, uid, points, demography](auto p)
+       [cid, aid, uid, points, demography, thumb](auto p)
        {
          Json j;
          j.SetKey("api", "TRAIL");
@@ -382,6 +383,9 @@ class CCameraManager : public CManager
          j.SetKey("uid", uid);
          j.SetKey("points", points);
          j.SetKey("demography", demography);
+         char encoded[360*500] = { '\0' };
+         int n = Base64Encode((unsigned char *)encoded, thumb.data(), thumb.size());
+         j.SetKey("thumbnail", encoded);
 
          auto c = std::dynamic_pointer_cast<NPL::CProtocolHTTP>(p);
 
