@@ -383,8 +383,8 @@ class CCameraManager : public CManager
          j.SetKey("uid", uid);
          j.SetKey("points", points);
          j.SetKey("demography", demography);
-         char encoded[360*500] = { '\0' };
-         int n = Base64Encode((unsigned char *)encoded, thumb.data(), thumb.size());
+         char encoded[360*500];
+         int n = Base64Encode((unsigned char *)encoded, thumb.data(), static_cast<int>(thumb.size()));
          j.SetKey("thumbnail", encoded);
 
          auto c = std::dynamic_pointer_cast<NPL::CProtocolHTTP>(p);
@@ -404,7 +404,7 @@ class CCameraManager : public CManager
       j.SetKey("sid", sid);
       j.SetKey("req", "play");
       char encoded[360*500];
-      int n = Base64Encode((unsigned char *)encoded, frame.data(), frame.size());
+      size_t n = Base64Encode((unsigned char *)encoded, frame.data(), static_cast<int>(frame.size()));
       j.SetKey("frame", encoded);
       SendResponse(j);
     }
