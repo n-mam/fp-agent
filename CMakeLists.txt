@@ -1,14 +1,72 @@
 project (fpd)
 
 set(CMAKE_VERBOSE_MAKEFILE ON)
+# SET OPENCV_DIR=C:/opencv/build/install
+# SET OPENSSL_ROOT_DIR=C:/vcpkg/installed/x64-windows
 
 find_package(Threads REQUIRED)
 find_package(OpenCV REQUIRED)
 find_package(OpenSSL REQUIRED)
+find_package(InferenceEngine 2.0 REQUIRED)
 
-# SET OPENSSL_ROOT_DIR=C:/vcpkg/installed/x64-windows
+macro(ie_add_sample_cvl)
+    set(options EXCLUDE_CPPLINT)
+    set(oneValueArgs NAME)
+    set(multiValueArgs SOURCES HEADERS DEPENDENCIES OPENCV_DEPENDENCIES INCLUDE_DIRECTORIES)
+    cmake_parse_arguments(IE_SAMPLE "${options}" "${oneValueArgs}"
+                          "${multiValueArgs}" ${ARGN} )
 
-ADD_EXECUTABLE(fpd fpd.cpp)
+    # Find OpenCV components if exist
+    if(IE_SAMPLE_OPENCV_DEPENDENCIES)
+        find_package(OpenCV COMPONENTS ${IE_SAMPLE_OPENCV_DEPENDENCIES} QUIET)
+        if(NOT OpenCV_FOUND)
+            message(WARNING "OPENCV is disabled or not found, " ${IE_SAMPLE_NAME} " skipped")
+            return()
+        else()
+            add_definitions(-DUSE_OPENCV)
+        endif()
+    endif()
+
+    # Create named folders for the sources within the .vcproj
+    # Empty name lists them directly under the .vcproj
+    source_group("src" FILES ${IE_SAMPLE_SOURCES})
+    if(IE_SAMPLE_HEADERS)
+        source_group("include" FILES ${IE_SAMPLE_HEADERS})
+    endif()
+
+    # Create executable file from sources
+    add_executable(${IE_SAMPLE_NAME} ${IE_SAMPLE_SOURCES} ${IE_SAMPLE_HEADERS})
+
+    if(WIN32)
+        set_target_properties(${IE_SAMPLE_NAME} PROPERTIES COMPILE_PDB_NAME ${IE_SAMPLE_NAME})
+    endif()
+
+    if(IE_SAMPLE_INCLUDE_DIRECTORIES)
+        target_include_directories(${IE_SAMPLE_NAME} PRIVATE ${IE_SAMPLE_INCLUDE_DIRECTORIES})
+    endif()
+    target_include_directories(${IE_SAMPLE_NAME} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/../common")
+
+    target_link_libraries(${IE_SAMPLE_NAME} PRIVATE ${OpenCV_LIBRARIES} ${InferenceEngine_LIBRARIES}
+                                                    ${IE_SAMPLE_DEPENDENCIES} Ws2_32)
+
+    if(UNIX)
+        target_link_libraries(${IE_SAMPLE_NAME} PRIVATE pthread)
+    endif()
+
+    # create global target with all samples / demo apps
+    if(NOT TARGET ie_samples)
+        add_custom_target(ie_samples ALL)
+    endif()
+    add_dependencies(ie_samples ${IE_SAMPLE_NAME})
+
+    if(COMMAND add_cpplint_target AND NOT IE_SAMPLE_EXCLUDE_CPPLINT)
+        add_cpplint_target(${IE_SAMPLE_NAME}_cpplint FOR_TARGETS ${IE_SAMPLE_NAME})
+    endif()
+endmacro()
+
+ie_add_sample_cvl(
+    NAME fpd
+    SOURCES fpd.cpp)
 
 SET_PROPERTY(TARGET fpd PROPERTY CXX_STANDARD 17)
 
@@ -34,23 +92,6 @@ TARGET_INCLUDE_DIRECTORIES(
  ${CMAKE_CURRENT_SOURCE_DIR}/../cpp-cvl
  ${CMAKE_CURRENT_SOURCE_DIR}/../cpp-cvl/INCLUDE
 )
-
-TARGET_LINK_LIBRARIES(
-  fpd
-  ${OpenCV_LIBS}
-  OpenSSL::SSL
-  ${CMAKE_THREAD_LIBS_INIT}
-  Ws2_32.lib
-)
-
-if(OPENVINO)
- TARGET_LINK_LIBRARIES(
-   fpd
-   fd
-   pt
-   fr
- )
-endif (OPENVINO)
 
 # NSIS installer logic for windows
 
