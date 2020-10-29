@@ -104,8 +104,6 @@ class CCameraManager : public CManager
 
       json.SetKey("sessions", Json::JsonListToArray(sl));
 
-      SendResponse(json);
-
       return sl;
     }
 
