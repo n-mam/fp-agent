@@ -1,6 +1,7 @@
 #ifndef OSMANAGER_HPP
 #define OSMANAGER_HPP
 
+#include <osl.hpp>
 #include <Manager.hpp>
 
 class COSManager : public CManager
@@ -15,18 +16,19 @@ class COSManager : public CManager
 
         if (req == "get-volumes")
         {
-          GetVolumes(json);
+          OSL::GetVolumes(json);
+        }
+        else
+        {
+          json.SetKey("error", "Unknown request : " + req);
         }
       }
       else
       {
-
+        json.SetKey("error", "Request missing");
       }
-    }
 
-    void GetVolumes(Json& json)
-    {
-
+      SendResponse(json);
     }
 
 };
