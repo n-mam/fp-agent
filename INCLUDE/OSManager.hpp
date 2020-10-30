@@ -16,7 +16,19 @@ class COSManager : public CManager
 
         if (req == "get-volumes")
         {
-          OSL::GetVolumes(json);
+          OSL::GetVolumeList(json);
+        }
+        else if (req == "get-snapshots")
+        {
+          OSL::GetSnapshotList(json);
+        }
+        else if (req == "get-free-drives")
+        {
+          OSL::GetFreeDriveList(json);
+        }
+        else if (req == "get-directory-list")
+        {
+          OSL::GetDirectoryList(json);
         }
         else
         {
