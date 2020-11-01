@@ -1,6 +1,8 @@
+cmake_minimum_required(VERSION 3.0)
+
 project (fpd)
 
-set(CMAKE_VERBOSE_MAKEFILE ON)
+# set(CMAKE_VERBOSE_MAKEFILE ON)
 # SET OPENCV_DIR=C:/opencv/build/install
 # SET OPENSSL_ROOT_DIR=C:/vcpkg/installed/x64-windows
 
@@ -47,7 +49,7 @@ macro(ie_add_sample_cvl)
     target_include_directories(${IE_SAMPLE_NAME} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/../common")
 
     target_link_libraries(${IE_SAMPLE_NAME} PRIVATE ${OpenCV_LIBRARIES} ${InferenceEngine_LIBRARIES}
-                                                    ${IE_SAMPLE_DEPENDENCIES} Ws2_32)
+                                                    ${IE_SAMPLE_DEPENDENCIES} Ws2_32.lib)
 
     if(UNIX)
         target_link_libraries(${IE_SAMPLE_NAME} PRIVATE pthread)
@@ -71,15 +73,12 @@ ie_add_sample_cvl(
 SET_PROPERTY(TARGET fpd PROPERTY CXX_STANDARD 17)
 
 if (WIN32)
-
   SET (CMAKE_CXX_FLAGS_RELEASE "/Zi /Od")
-
   SET_TARGET_PROPERTIES(
    fpd PROPERTIES 
    LINK_FLAGS 
    "/DEBUG /OPT:REF /OPT:ICF"
   )
-
 endif (WIN32)
 
 TARGET_INCLUDE_DIRECTORIES(
