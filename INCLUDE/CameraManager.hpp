@@ -95,7 +95,7 @@ class CCameraManager : public CManager
 
         if (!camera) continue;
 
-        bool paused = camera->IsPaused();
+        bool paused = camera->GetPropertyAsBool("pause");
         bool started = camera->IsStarted();
 
         s.SetKey("paused", paused ? "true" : "false");
@@ -243,7 +243,8 @@ class CCameraManager : public CManager
         return;
       }
 
-      camera->Play();
+      camera->SetProperty("play", "true");
+      camera->SetProperty("pause", "false");
     }
 
     void CameraStopPlay(Json& json)
@@ -256,7 +257,7 @@ class CCameraManager : public CManager
         return;
       }
 
-      camera->StopPlay();
+      camera->SetProperty("play", "false");
     }
 
     void CameraPause(Json& json)
@@ -271,7 +272,7 @@ class CCameraManager : public CManager
 
       if (camera->IsStarted())
       {
-        camera->Pause();
+        camera->SetProperty("pause", "true");
       }
     }
 
