@@ -94,6 +94,8 @@ TARGET_INCLUDE_DIRECTORIES(
  ${CMAKE_CURRENT_SOURCE_DIR}/../cpp-osl/INCLUDE
 )
 
+target_link_libraries(fpd PRIVATE fr)
+
 # NSIS installer logic for windows
 
 if (WIN32)
