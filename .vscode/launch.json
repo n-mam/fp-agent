@@ -11,7 +11,7 @@
             "program": "${workspaceFolder}/../build/intel64/Release/fpd.exe",
             "args": [],
             "stopAtEntry": false,
-            "cwd": "${workspaceFolder}/../build",
+            "cwd": "${workspaceFolder}/INCLUDE/",
             "environment": [{"name": "cpp-cvl-test", "value": "ooo"}],
             "externalConsole": true
         },

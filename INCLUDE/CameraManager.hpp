@@ -126,21 +126,21 @@ class CCameraManager : public CManager
 
        NPL::SPCSubject<uint8_t, uint8_t> camera = nullptr;
 
-      if (target == "face_rec")
+      if (target == "fr")
       {
         camera = CVL::make_camera_ov(source, target);
       }
       else
       {
         camera = CVL::make_camera(source, target, algo, tracker);
-      }
 
-      auto bbarea = json.GetKey("bbarea");
-      if (bbarea.size()) camera->SetProperty("bbarea", bbarea);
-      auto exhzbb = json.GetKey("exhzbb");
-      if (exhzbb.size()) camera->SetProperty("exhzbb", exhzbb);
-      auto skipcount = json.GetKey("skipcount");
-      if (skipcount.size()) camera->SetProperty("skipcount", skipcount);
+        auto bbarea = json.GetKey("bbarea");
+        if (bbarea.size()) camera->SetProperty("bbarea", bbarea);
+        auto exhzbb = json.GetKey("exhzbb");
+        if (exhzbb.size()) camera->SetProperty("exhzbb", exhzbb);
+        auto skipcount = json.GetKey("skipcount");
+        if (skipcount.size()) camera->SetProperty("skipcount", skipcount);
+      }
 
       SessionMap.insert(std::make_pair(sid, camera));
 
