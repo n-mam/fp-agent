@@ -202,6 +202,10 @@ class CCameraManager : public CManager
           {
             CameraTrailEvent(cid, aid, uid, data1, data2, frame, aep);
           }
+          else if (e == "face")
+          {
+            CameraFREvent();
+          }          
           else if (e == "play")
           {
             CameraPlayEvent(sid, frame);
@@ -362,7 +366,12 @@ class CCameraManager : public CManager
       j.SetKey("req", "camera-stop");
       SendResponse(j);
     }
-  
+
+    void CameraFREvent()
+    {
+
+    }
+
     void CameraTrailEvent(
       const std::string& cid,
       const std::string& aid,
