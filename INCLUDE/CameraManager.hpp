@@ -204,7 +204,7 @@ class CCameraManager : public CManager
           }
           else if (e == "face")
           {
-            CameraFREvent();
+            CameraFREvent(cid, aid, uid, data1, data2, aep);
           }          
           else if (e == "play")
           {
@@ -367,9 +367,38 @@ class CCameraManager : public CManager
       SendResponse(j);
     }
 
-    void CameraFREvent()
+    void CameraFREvent(
+      const std::string& cid,
+      const std::string& aid,
+      const std::string& uid,
+      const std::string& tag,
+      const std::string& count,
+      const std::string& aep)
     {
+      auto http = NPL::make_http_client(
+        (aep == "localhost") ?
+           "127.0.0.1" : "52.66.251.154",
+        8080);
 
+      http->StartClient(
+       [cid, aid, uid, tag, count](auto p)
+       {
+         Json j;
+         j.SetKey("api", "TRAIL");
+         j.SetKey("cid", cid);
+         j.SetKey("aid", aid);
+         j.SetKey("uid", uid);
+         j.SetKey("tag", tag);
+         j.SetKey("count", count);
+
+         auto c = std::dynamic_pointer_cast<NPL::CProtocolHTTP>(p);
+
+         if (c)
+         {
+           c->Post("/api", j.Stringify());
+         }
+       }
+      );
     }
 
     void CameraTrailEvent(
