@@ -371,7 +371,7 @@ class CCameraManager : public CManager
       const std::string& cid,
       const std::string& aid,
       const std::string& uid,
-      const std::string& tag,
+      const std::string& label,
       const std::string& count,
       const std::string& aep)
     {
@@ -381,14 +381,14 @@ class CCameraManager : public CManager
         8080);
 
       http->StartClient(
-       [cid, aid, uid, tag, count](auto p)
+       [cid, aid, uid, label, count](auto p)
        {
          Json j;
          j.SetKey("api", "TRAIL");
          j.SetKey("cid", cid);
          j.SetKey("aid", aid);
          j.SetKey("uid", uid);
-         j.SetKey("tag", tag);
+         j.SetKey("label", label);
          j.SetKey("count", count);
 
          auto c = std::dynamic_pointer_cast<NPL::CProtocolHTTP>(p);
