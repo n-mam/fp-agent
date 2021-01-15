@@ -1,8 +1,9 @@
 #ifndef OSMANAGER_HPP
 #define OSMANAGER_HPP
 
-#include <osl.hpp>
 #include <Manager.hpp>
+
+#include <osl.hpp>
 
 class COSManager : public CManager
 {
@@ -14,11 +15,11 @@ class COSManager : public CManager
       {
         auto req = json.GetKey("req");
 
-        if (req == "get-volumes")
+        if (req == "get-volume-list")
         {
           OSL::GetVolumeList(json);
         }
-        else if (req == "get-snapshots")
+        else if (req == "get-snapshot-list")
         {
           OSL::GetSnapshotList(json);
         }

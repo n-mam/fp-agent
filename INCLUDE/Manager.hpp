@@ -1,12 +1,12 @@
 #ifndef MANAGER_HPP
 #define MANAGER_HPP
 
+#include <npl.hpp>
+
 #include <set>
 #include <memory>
 #include <vector>
 #include <assert.h>
-
-#include <npl.hpp>
 
 class CManager;
 

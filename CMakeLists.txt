@@ -94,7 +94,7 @@ TARGET_INCLUDE_DIRECTORIES(
  ${CMAKE_CURRENT_SOURCE_DIR}/../cpp-osl/INCLUDE
 )
 
-target_link_libraries(fpd PRIVATE fr)
+target_link_libraries(fpd PRIVATE fr virtdisk.lib)
 
 # NSIS installer logic for windows
 
