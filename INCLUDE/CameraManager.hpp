@@ -205,7 +205,7 @@ class CCameraManager : public CManager
           else if (e == "face")
           {
             CameraFREvent(cid, aid, uid, data1, data2, aep);
-          }          
+          }
           else if (e == "play")
           {
             CameraPlayEvent(sid, frame);
