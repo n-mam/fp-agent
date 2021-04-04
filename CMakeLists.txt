@@ -94,7 +94,7 @@ TARGET_INCLUDE_DIRECTORIES(
  ${CMAKE_CURRENT_SOURCE_DIR}/../cpp-osl/INCLUDE
 )
 
-target_link_libraries(fpd PRIVATE fr virtdisk.lib)
+target_link_libraries(fpd PRIVATE fr)
 
 # NSIS installer logic for windows
 
@@ -120,10 +120,8 @@ install(
   PROGRAMS
   $ENV{OPENSSL_ROOT_DIR}/bin/libssl-1_1-x64.dll
   $ENV{OPENSSL_ROOT_DIR}/bin/libcrypto-1_1-x64.dll
-  $ENV{OPENCV_DIR}/x64/vc16/bin/opencv_world440.dll
-  $ENV{OPENCV_DIR}/x64/vc16/bin/opencv_videoio_ffmpeg440_64.dll
-  "C:/PROGRA~2/IntelSWTools/compilers_and_libraries/windows/redist/intel64_win/tbb/vc_mt/tbb.dll"
-  "C:/PROGRA~2/IntelSWTools/compilers_and_libraries/windows/redist/intel64_win/compiler/libiomp5md.dll"
+  $ENV{OPENCV_DIR}/x64/vc16/bin/opencv_world450.dll
+  $ENV{OPENCV_DIR}/x64/vc16/bin/opencv_videoio_ffmpeg450_64.dll
   DESTINATION
   ${CPACK_NSIS_INSTALL_ROOT}/${CPACK_PACKAGE_INSTALL_DIRECTORY}
 )
