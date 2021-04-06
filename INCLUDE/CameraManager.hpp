@@ -191,7 +191,7 @@ class CCameraManager : public CManager
       auto uid = json.GetKey("uid");
       auto aep = json.GetKey("aep");
 
-      camera->Start(
+      auto fRet = camera->Start(
         [this, cid, sid, aid, uid, aep](const std::string& e, const std::string& data1, const std::string& data2, std::vector<uint8_t>& frame)
         {
           if (e == "stop")
@@ -210,7 +210,13 @@ class CCameraManager : public CManager
           {
             CameraPlayEvent(sid, frame);
           }
-        });
+        }
+      );
+
+      if (!fRet)
+      {
+        json.SetKey("error", "Failed to start camera");
+      }
     }
 
     void CameraStop(Json& json)
