@@ -124,7 +124,13 @@ class CCameraManager : public CManager
         return;
       }
 
-       NPL::SPCSubject<uint8_t, uint8_t> camera = nullptr;
+      if (!std::getenv("cpp-cvl-home"))
+      {
+        json.SetKey("error", "create : cpp-cvl-home env variable not set");
+        return;
+      }
+
+      NPL::SPCSubject<uint8_t, uint8_t> camera = nullptr;
 
       if (target == "fr")
       {
