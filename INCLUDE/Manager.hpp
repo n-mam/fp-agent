@@ -2,6 +2,7 @@
 #define MANAGER_HPP
 
 #include <npl.hpp>
+#include <osl.hpp>
 
 #include <set>
 #include <memory>

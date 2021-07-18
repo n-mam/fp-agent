@@ -37,7 +37,7 @@ class CFTPManager : public CManager
       auto pass = json.GetKey("pass");
       auto ftps = json.GetKey("ftps");
 
-      auto ftp = NPL::make_ftp(host, std::stoi(port), NPL::TLS::NO);
+      auto ftp = NPL::make_ftp(host, std::stoi(port), NPL::TLS::No);
 
       ftp->SetCredentials(user, pass);
 
